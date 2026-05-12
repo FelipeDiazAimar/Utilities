@@ -255,6 +255,61 @@
                 padding: 1rem;
             }
         }
+        :root {
+            --primary: #60a5fa;
+            --primary-hover: #3b82f6;
+            --secondary: #34d399;
+            --bg-gradient-1: #020617;
+            --bg-gradient-2: #0f172a;
+            --surface: rgba(17, 24, 39, 0.9);
+            --text-main: #e5e7eb;
+            --text-light: #94a3b8;
+            --border: rgba(51, 65, 85, 0.8);
+            --pivot-col: rgba(250, 204, 21, 0.35);
+            --pivot-row: rgba(248, 113, 113, 0.2);
+            --pivot-cell: #f59e0b;
+        }
+        input[type="number"], select { background: #0f172a; color: var(--text-main); border-color: #334155; }
+        .form-container { background: rgba(15, 23, 42, 0.7); }
+        .iteration-card { background: #0f172a; box-shadow: 0 4px 15px rgba(0,0,0,0.35); }
+        .iteration-info { color: #cbd5e1; }
+        .iteration-info span { background: #1e293b; }
+        th, td { border-color: #334155; }
+        th, .theta-cell { background-color: #1e293b; color: #e5e7eb; }
+        .interpretation { background: #052e1c; border-color: #166534; }
+        .interpretation h3 { color: #86efac; }
+        .mobile-stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 0.2rem;
+        }
+        .mobile-stepper > input[type="number"] {
+            margin: 0;
+            border: none;
+            width: 74px;
+            min-width: 74px;
+            text-align: center;
+        }
+        .step-btn {
+            border: 0;
+            min-width: 38px;
+            min-height: 38px;
+            border-radius: 8px;
+            font-weight: 700;
+            color: #e2e8f0;
+            background: #1e293b;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+        .step-btn:hover { background: #334155; }
+        @media (max-width: 768px) {
+            .mobile-stepper { width: 100%; justify-content: space-between; }
+            .mobile-stepper > input[type="number"] { flex: 1; width: auto; min-width: 0; }
+        }
     </style>
 </head>
 <body>
@@ -387,8 +442,55 @@
         }
         document.getElementById('constraintsFunc').innerHTML = consHtml;
         document.getElementById('formContainer').style.display = 'block';
-        document.getElementById('output').innerHTML = ''; 
+        document.getElementById('output').innerHTML = '';
+        enhanceNumberInputs(document.getElementById('formContainer'));
     }
+
+    function enhanceNumberInputs(root = document) {
+        const inputs = root.querySelectorAll('input[type="number"]');
+        inputs.forEach((input) => {
+            if (input.dataset.stepper === 'on') return;
+            if (input.closest('.mobile-stepper')) {
+                input.dataset.stepper = 'on';
+                return;
+            }
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mobile-stepper';
+            const minusBtn = document.createElement('button');
+            minusBtn.type = 'button';
+            minusBtn.className = 'step-btn';
+            minusBtn.textContent = '-1';
+            const plusBtn = document.createElement('button');
+            plusBtn.type = 'button';
+            plusBtn.className = 'step-btn';
+            plusBtn.textContent = '+1';
+
+            input.parentNode.insertBefore(wrapper, input);
+            wrapper.appendChild(minusBtn);
+            wrapper.appendChild(input);
+            wrapper.appendChild(plusBtn);
+            input.dataset.stepper = 'on';
+
+            minusBtn.addEventListener('click', () => nudgeInput(input, -1));
+            plusBtn.addEventListener('click', () => nudgeInput(input, 1));
+        });
+    }
+
+    function nudgeInput(input, delta) {
+        const current = parseFloat(input.value || '0');
+        const min = input.min !== '' ? parseFloat(input.min) : null;
+        const max = input.max !== '' ? parseFloat(input.max) : null;
+        let next = current + delta;
+        if (min !== null && next < min) next = min;
+        if (max !== null && next > max) next = max;
+        input.value = Number.isInteger(next) ? String(next) : next.toString();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        enhanceNumberInputs(document.querySelector('.setup-section'));
+    });
 
     // Helper visual (Combina la fracción exacta con el decimal si lo requiere)
     function fmt(numObj, showDec = false) {

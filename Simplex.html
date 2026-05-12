@@ -187,6 +187,57 @@
                 margin-bottom: 0.5rem;
             }
         }
+        :root {
+            color-scheme: dark;
+            --bg-dark: #0b1220;
+            --surface-dark: #111827;
+            --panel-dark: #1f2937;
+            --text-dark: #e5e7eb;
+            --border-dark: #334155;
+            --accent-dark: #38bdf8;
+        }
+        body { background-color: var(--bg-dark); color: var(--text-dark); }
+        .container { background: var(--surface-dark); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); }
+        h1, h2, h3 { color: var(--text-dark); border-bottom-color: var(--border-dark); }
+        .config-panel, .step-box, .formula { background: var(--panel-dark); color: var(--text-dark); }
+        .step-box { border-left-color: var(--accent-dark); }
+        input[type="number"] { background: #0f172a; color: var(--text-dark); border-color: var(--border-dark); }
+        table { background: #0f172a; }
+        th, td { border-color: var(--border-dark); }
+        th { background-color: #1e293b; color: var(--text-dark); }
+        .result-box { background: #052e1c; color: #bbf7d0; border: 1px solid #166534; }
+        .mobile-stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #0f172a;
+            border: 1px solid var(--border-dark);
+            border-radius: 10px;
+            padding: 0.2rem;
+        }
+        .mobile-stepper > input[type="number"] {
+            margin: 0;
+            border: none;
+            width: 64px;
+            min-width: 64px;
+            text-align: center;
+        }
+        .step-btn {
+            border: 0;
+            min-width: 38px;
+            min-height: 38px;
+            border-radius: 8px;
+            font-weight: 700;
+            color: #e2e8f0;
+            background: #1e293b;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+        .step-btn:hover { background: #334155; }
+        @media (max-width: 768px) {
+            .mobile-stepper { width: 100%; justify-content: space-between; }
+            .mobile-stepper > input[type="number"] { flex: 1; width: auto; min-width: 0; }
+        }
     </style>
 </head>
 <body>
@@ -233,7 +284,11 @@
     }
 
     // Inicializar el formulario con el Problema Prototípico
-    window.onload = () => { generarFormulario(); cargarDatosPrototipicos(); };
+    window.onload = () => {
+        generarFormulario();
+        cargarDatosPrototipicos();
+        enhanceNumberInputs(document);
+    };
 
     function generarFormulario() {
         const v = parseInt(document.getElementById('numVars').value);
@@ -251,6 +306,49 @@
             html += ` &nbsp; &le; &nbsp; <input type="number" id="b_${i}" value="0"></div>`;
         }
         document.getElementById('form-container').innerHTML = html;
+        enhanceNumberInputs(document.getElementById('form-container'));
+    }
+
+    function enhanceNumberInputs(root = document) {
+        const inputs = root.querySelectorAll('input[type="number"]');
+        inputs.forEach((input) => {
+            if (input.dataset.stepper === 'on') return;
+            if (input.closest('.mobile-stepper')) {
+                input.dataset.stepper = 'on';
+                return;
+            }
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mobile-stepper';
+            const minusBtn = document.createElement('button');
+            minusBtn.type = 'button';
+            minusBtn.className = 'step-btn';
+            minusBtn.textContent = '-1';
+            const plusBtn = document.createElement('button');
+            plusBtn.type = 'button';
+            plusBtn.className = 'step-btn';
+            plusBtn.textContent = '+1';
+
+            input.parentNode.insertBefore(wrapper, input);
+            wrapper.appendChild(minusBtn);
+            wrapper.appendChild(input);
+            wrapper.appendChild(plusBtn);
+            input.dataset.stepper = 'on';
+
+            minusBtn.addEventListener('click', () => nudgeInput(input, -1));
+            plusBtn.addEventListener('click', () => nudgeInput(input, 1));
+        });
+    }
+
+    function nudgeInput(input, delta) {
+        const current = parseFloat(input.value || '0');
+        const min = input.min !== '' ? parseFloat(input.min) : null;
+        const max = input.max !== '' ? parseFloat(input.max) : null;
+        let next = current + delta;
+        if (min !== null && next < min) next = min;
+        if (max !== null && next > max) next = max;
+        input.value = Number.isInteger(next) ? String(next) : next.toString();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     function cargarDatosPrototipicos() {

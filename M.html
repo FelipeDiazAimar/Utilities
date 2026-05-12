@@ -209,6 +209,57 @@
                 font-size: 0.9rem;
             }
         }
+        :root {
+            --bg: #090f1a;
+            --card-bg: #111827;
+            --text-main: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+        }
+        body { background-color: var(--bg); }
+        .card { background: var(--card-bg); }
+        h2 { border-bottom-color: #1f2937; }
+        select, input { background: #0f172a; color: var(--text-main); border-color: var(--border); }
+        table { background: #0f172a; }
+        th { background-color: #1e293b; color: var(--text-main); }
+        .summary-box { background: #052e1c; border-color: #166534; color: #bbf7d0; }
+        .summary-box h3 { color: #86efac; }
+        .function-box { background: #172554; color: #dbeafe; }
+        .function-box.alt { background: #1e293b; color: #cbd5e1; }
+        .function-box code { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; }
+        .mobile-stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.2rem;
+        }
+        .mobile-stepper > input[type="number"] {
+            margin: 0;
+            border: none;
+            min-width: 62px;
+            width: 62px;
+            text-align: center;
+        }
+        .step-btn {
+            border: 0;
+            min-width: 38px;
+            min-height: 38px;
+            border-radius: 8px;
+            font-weight: 700;
+            color: #e2e8f0;
+            background: #1e293b;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+        .step-btn:hover { background: #334155; }
+        @media (max-width: 768px) {
+            .mobile-stepper { width: 100%; justify-content: space-between; }
+            .mobile-stepper > input[type="number"] { flex: 1; width: auto; min-width: 0; }
+        }
     </style>
 </head>
 <body>
@@ -293,9 +344,56 @@
             <button class="btn btn-danger" onclick="removeRestriction(${restrictionCount})">✕</button>
         `;
         container.appendChild(row);
+        enhanceNumberInputs(row);
     }
 
     function removeRestriction(id) { document.getElementById(`row-${id}`).remove(); }
+
+    function enhanceNumberInputs(root = document) {
+        const inputs = root.querySelectorAll('input[type="number"]');
+        inputs.forEach((input) => {
+            if (input.dataset.stepper === 'on') return;
+            if (input.closest('.mobile-stepper')) {
+                input.dataset.stepper = 'on';
+                return;
+            }
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mobile-stepper';
+            const minusBtn = document.createElement('button');
+            minusBtn.type = 'button';
+            minusBtn.className = 'step-btn';
+            minusBtn.textContent = '-1';
+            const plusBtn = document.createElement('button');
+            plusBtn.type = 'button';
+            plusBtn.className = 'step-btn';
+            plusBtn.textContent = '+1';
+
+            input.parentNode.insertBefore(wrapper, input);
+            wrapper.appendChild(minusBtn);
+            wrapper.appendChild(input);
+            wrapper.appendChild(plusBtn);
+            input.dataset.stepper = 'on';
+
+            minusBtn.addEventListener('click', () => nudgeInput(input, -1));
+            plusBtn.addEventListener('click', () => nudgeInput(input, 1));
+        });
+    }
+
+    function nudgeInput(input, delta) {
+        const current = parseFloat(input.value || '0');
+        const min = input.min !== '' ? parseFloat(input.min) : null;
+        const max = input.max !== '' ? parseFloat(input.max) : null;
+        let next = current + delta;
+        if (min !== null && next < min) next = min;
+        if (max !== null && next > max) next = max;
+        input.value = Number.isInteger(next) ? String(next) : next.toString();
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        enhanceNumberInputs(document);
+    });
 
     // --- MOTOR MATEMÁTICO RACIONAL (FRACCIONES) ---
     function gcd(a, b) {
