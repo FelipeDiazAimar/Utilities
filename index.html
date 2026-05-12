@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP-Calculator - Métodos de Optimización</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --secondary: #10B981;
+            --tertiary: #F59E0B;
+            --bg-gradient-1: #EEF2FF;
+            --bg-gradient-2: #C7D2FE;
+            --surface: rgba(255, 255, 255, 0.85);
+            --text-main: #1F2937;
+            --text-light: #6B7280;
+            --border: rgba(255, 255, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #7C3AED);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            display: inline-block;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+            line-height: 1.6;
+        }
+
+        .card-features {
+            list-style: none;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        .card-features li {
+            padding: 0.3rem 0;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-features li::before {
+            content: '✓';
+            color: var(--secondary);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .card-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), #7C3AED);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: auto;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .card-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Media Queries - Responsividad */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 2rem;
+            }
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+            .header {
+                margin-bottom: 2rem;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .header p {
+                font-size: 1rem;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+            .card h2 {
+                font-size: 1.3rem;
+            }
+            .card p {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+                min-height: auto;
+            }
+            .container {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            .header {
+                margin-bottom: 1.5rem;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .header p {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+            .tagline {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .card-icon {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+            }
+            .card h2 {
+                font-size: 1.1rem;
+                margin-bottom: 0.3rem;
+            }
+            .card p {
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem;
+            }
+            .card-features {
+                margin: 0.5rem 0;
+                font-size: 0.8rem;
+            }
+            .card-features li {
+                padding: 0.2rem 0;
+            }
+            .card-button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.85rem;
+                margin-top: 0.8rem;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .footer {
+                margin-top: 2rem;
+                padding-top: 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 IP-Calculator</h1>
+            <p>Métodos de Optimización Matemática</p>
+            <div class="tagline">Resolución exacta con fracciones y álgebra</div>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Card: Simplex -->
+            <a href="Simplex.html" class="card">
+                <div class="card-icon">📊</div>
+                <h2>Método Simplex</h2>
+                <p>Resuelve problemas de programación lineal usando el algoritmo Simplex clásico.</p>
+                <ul class="card-features">
+                    <li>Maximización/Minimización</li>
+                    <li>Fracciones exactas</li>
+                    <li>Paso a paso</li>
+                </ul>
+                <button class="card-button">Ir al Simplex →</button>
+            </a>
+
+            <!-- Card: Dos Fases -->
+            <a href="2fases.html" class="card">
+                <div class="card-icon">🔄</div>
+                <h2>Método Dos Fases</h2>
+                <p>Resuelve problemas con restricciones de igualdad y desigualdad (≥ y ≤).</p>
+                <ul class="card-features">
+                    <li>Variables artificiales</li>
+                    <li>Fase I y Fase II</li>
+                    <li>Precisión exacta</li>
+                </ul>
+                <button class="card-button">Ir a Dos Fases →</button>
+            </a>
+
+            <!-- Card: Gran M -->
+            <a href="M.html" class="card">
+                <div class="card-icon">🎯</div>
+                <h2>Método de la Gran M</h2>
+                <p>Utiliza penalizaciones (M) para manejar variables artificiales en una sola fase.</p>
+                <ul class="card-features">
+                    <li>Penalizaciones algebraicas</li>
+                    <li>Fracciones y variables M</li>
+                    <li>Una sola fase</li>
+                </ul>
+                <button class="card-button">Ir a Gran M →</button>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>💡 Selecciona un método de optimización para comenzar</p>
+            <p style="margin-top: 1rem; font-size: 0.85rem;">Todos los cálculos utilizan aritmética exacta con fracciones para máxima precisión</p>
+        </div>
+    </div>
+</body>
+</html>
