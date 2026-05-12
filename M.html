@@ -32,8 +32,8 @@
         .card { background: var(--card-bg); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; border: 1px solid var(--border); }
         h2 { font-size: 1.2rem; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bg); padding-bottom: 0.5rem; }
         
-        .form-group, .restriction-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
-        select, input { padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; font-family: inherit; outline: none; }
+        .form-group, .restriction-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; row-gap: 0.5rem; }
+        select, input { padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; font-family: inherit; outline: none; min-height: 44px; }
         select:focus, input:focus { border-color: var(--primary); }
         input[type="number"] { width: 75px; text-align: center; }
 
@@ -107,18 +107,24 @@
             }
             .form-group, .restriction-row {
                 flex-wrap: wrap;
-                gap: 0.5rem;
+                gap: 0.6rem;
+                row-gap: 0.6rem;
+            }
+            .form-group span, .restriction-row span {
+                font-size: 0.95rem;
+            }
+            input[type="number"], select {
+                padding: 0.6rem 0.7rem;
+                font-size: 1rem;
+                min-height: 44px;
             }
             input[type="number"] {
-                width: 60px;
-                padding: 0.5rem;
-            }
-            select {
-                padding: 0.5rem;
+                width: 70px;
             }
             .btn {
-                padding: 0.5rem 1rem;
+                padding: 0.6rem 1.2rem;
                 font-size: 0.9rem;
+                min-height: 44px;
             }
             .table-container {
                 overflow-x: auto;
@@ -163,21 +169,24 @@
             }
             .form-group, .restriction-row {
                 flex-direction: column;
-                gap: 0.4rem;
+                gap: 0.5rem;
+                width: 100%;
             }
             .form-group span, .restriction-row span {
-                display: none;
+                display: inline;
+                font-size: 0.85rem;
+                color: var(--text-muted);
             }
             input[type="number"], select {
                 width: 100%;
-                padding: 0.5rem;
+                padding: 0.7rem 0.8rem;
                 font-size: 1rem;
                 min-height: 44px;
             }
             .btn {
                 width: 100%;
-                padding: 0.5rem;
-                font-size: 0.85rem;
+                padding: 0.7rem 1rem;
+                font-size: 0.9rem;
                 margin-top: 0.5rem;
                 min-height: 44px;
             }

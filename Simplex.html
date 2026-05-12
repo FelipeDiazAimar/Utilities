@@ -17,9 +17,9 @@
         .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
         .config-panel { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-        .input-group { margin-bottom: 10px; }
-        label { font-weight: bold; margin-right: 10px; }
-        input[type="number"] { width: 60px; padding: 5px; margin: 2px; border: 1px solid #ccc; border-radius: 4px; }
+        .input-group { margin-bottom: 10px; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; row-gap: 0.5rem; }
+        label { font-weight: bold; margin-right: 10px; font-size: 0.95rem; }
+        input[type="number"] { width: 60px; padding: 8px 6px; margin: 2px; border: 1px solid #ccc; border-radius: 4px; min-height: 44px; font-size: 1rem; }
         button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.3s; }
         button:hover { background-color: #0056b3; }
         table {
@@ -82,18 +82,21 @@
             }
             .input-group {
                 flex-wrap: wrap;
-                gap: 0.5rem;
+                gap: 0.6rem;
+                row-gap: 0.6rem;
             }
             label {
                 font-size: 0.9rem;
             }
             input[type="number"] {
-                width: 50px;
-                padding: 0.4rem;
+                width: 55px;
+                padding: 0.6rem 0.4rem;
+                min-height: 44px;
             }
             button {
-                padding: 0.6rem 1rem;
+                padding: 0.65rem 1rem;
                 font-size: 0.9rem;
+                min-height: 44px;
             }
             table {
                 font-size: 0.75rem;
@@ -132,23 +135,28 @@
                 border-radius: 4px;
             }
             .input-group {
-                flex-direction: column;
-                gap: 0.3rem;
+                flex-direction: row;
+                gap: 0.4rem;
+                flex-wrap: wrap;
+                row-gap: 0.8rem;
             }
             label {
                 font-size: 0.8rem;
-            }
-            input[type="number"], button {
-                width: 100%;
-                padding: 0.5rem;
-                min-height: 44px;
+                min-width: 100%;
+                margin-right: 0;
             }
             input[type="number"] {
-                margin: 0.3rem 0;
+                width: 100%;
+                padding: 0.7rem 0.8rem;
+                margin: 0;
+                font-size: 1rem;
+                min-height: 44px;
             }
             button {
-                padding: 0.5rem 0.8rem;
+                width: 100%;
+                padding: 0.7rem 1rem;
                 font-size: 0.85rem;
+                min-height: 44px;
             }
             table {
                 font-size: 0.6rem;
