@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Simplex - Dos Fases (Fracciones Exactas)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --secondary: #10B981;
+            --bg-gradient-1: #EEF2FF;
+            --bg-gradient-2: #C7D2FE;
+            --surface: rgba(255, 255, 255, 0.85);
+            --text-main: #1F2937;
+            --text-light: #6B7280;
+            --border: rgba(255, 255, 255, 0.3);
+            --pivot-col: rgba(252, 211, 77, 0.4);
+            --pivot-row: rgba(248, 113, 113, 0.3);
+            --pivot-cell: #F59E0B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+        }
+
+        h1 { text-align: center; color: var(--primary); margin-bottom: 1.5rem; font-weight: 700; }
+        h2 { color: var(--text-main); margin: 2rem 0 1rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem; display: inline-block; }
+        h3 { color: var(--text-light); margin-top: 1.5rem; margin-bottom: 0.5rem; }
+
+        .setup-section { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--text-light); }
+        
+        input[type="number"], select {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #D1D5DB;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input[type="number"]:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); }
+        input.coeff { width: 80px; text-align: center; }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        }
+        button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        button.success { background-color: var(--secondary); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); margin-top: 1rem;}
+        button.success:hover { background-color: #059669; }
+
+        .math-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .math-text { font-weight: 600; font-size: 1.1rem; }
+
+        .form-container { display: none; margin-top: 2rem; background: rgba(255,255,255,0.5); padding: 1.5rem; border-radius: 15px; }
+
+        /* Output styles */
+        #output { margin-top: 3rem; }
+        .iteration-card {
+            background: white; border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid var(--primary);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+        .iteration-info { margin-bottom: 1rem; font-weight: 600; color: #4B5563; }
+        .iteration-info span { background: #F3F4F6; padding: 0.2rem 0.6rem; border-radius: 5px; color: var(--primary); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.95rem; }
+        th, td { padding: 0.75rem; text-align: center; border: 1px solid #E5E7EB; white-space: nowrap; }
+        th { background-color: #F9FAFB; font-weight: 600; color: #374151; }
+        
+        .theta-col { background-color: #EEF2FF; color: var(--primary); font-weight: 600; border-right: 2px solid #C7D2FE; }
+        .theta-cell { background-color: #F9FAFB; border-right: 2px solid #E5E7EB; }
+        .theta-highlight { color: #D97706; font-weight: bold; background-color: rgba(252, 211, 77, 0.2); }
+
+        .pivot-col { background-color: var(--pivot-col); }
+        .pivot-row { background-color: var(--pivot-row); }
+        .pivot-cell { background-color: var(--pivot-cell) !important; color: white; font-weight: bold; border: 2px solid #D97706; }
+        
+        .interpretation {
+            background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 1.5rem; margin-top: 2rem;
+        }
+        .interpretation h3 { color: #065F46; margin-top: 0; }
+        .interpretation p { margin-bottom: 0.5rem; font-size: 1.05rem; }
+        
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+        .badge-phase1 { background: #DBEAFE; color: #1E40AF; }
+        .badge-phase2 { background: #D1FAE5; color: #065F46; }
+        .decimal-hint { font-size: 0.8rem; color: #6B7280; font-weight: normal; margin-left: 4px; }
+        
+        /* Media Queries - Responsividad */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 1.5rem;
+                max-width: 95%;
+            }
+            table { font-size: 0.85rem; }
+            th, td { padding: 0.5rem; }
+            input.coeff { width: 70px; }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+            h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+            h2 { font-size: 1.1rem; }
+            h3 { font-size: 1rem; }
+            .setup-section {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .input-group {
+                width: 100%;
+            }
+            input[type="number"], select {
+                width: 100%;
+                padding: 0.6rem;
+            }
+            input.coeff {
+                width: 100% !important;
+                max-width: 60px;
+            }
+            button {
+                width: 100%;
+                padding: 0.6rem 1rem;
+            }
+            .math-row {
+                gap: 0.3rem;
+                font-size: 0.9rem;
+            }
+            table {
+                font-size: 0.75rem;
+            }
+            th, td {
+                padding: 0.4rem;
+            }
+            .iteration-card {
+                padding: 1rem;
+                overflow-x: auto;
+            }
+            .interpretation {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            .container {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            h1 { font-size: 1.2rem; }
+            h2 { font-size: 1rem; }
+            h3 { font-size: 0.9rem; }
+            .setup-section {
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+            input[type="number"], select {
+                padding: 0.5rem;
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            input.coeff {
+                max-width: 50px;
+                padding: 0.4rem;
+            }
+            button {
+                padding: 0.5rem 1rem;
+                font-size: 0.95rem;
+                min-height: 44px;
+            }
+            .math-text { font-size: 0.95rem; }
+            .math-row {
+                gap: 0.2rem;
+                font-size: 0.8rem;
+            }
+            table {
+                font-size: 0.65rem;
+            }
+            th, td {
+                padding: 0.3rem;
+            }
+            .iteration-card {
+                padding: 0.8rem;
+                margin-bottom: 1rem;
+            }
+            .interpretation {
+                padding: 0.8rem;
+                font-size: 0.95rem;
+            }
+            .form-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>✨ Calculadora Simplex - Exacta (Fracciones)</h1>
+    
+    <div class="setup-section">
+        <div class="input-group">
+            <label>Nº Variables de Decisión (x)</label>
+            <input type="number" id="numVars" value="2" min="2" max="10">
+        </div>
+        <div class="input-group">
+            <label>Nº de Restricciones</label>
+            <input type="number" id="numCons" value="3" min="1" max="10">
+        </div>
+        <div class="input-group" style="justify-content: flex-end;">
+            <button onclick="generateForm()">Crear Modelo</button>
+        </div>
+    </div>
+
+    <div id="formContainer" class="form-container">
+        <h2>Función Objetivo</h2>
+        <div class="math-row" id="objectiveFunc"></div>
+
+        <h2>Restricciones</h2>
+        <div id="constraintsFunc"></div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="success" onclick="solve()">🚀 Resolver Exacto (2 Fases)</button>
+        </div>
+    </div>
+
+    <div id="output"></div>
+</div>
+
+<script>
+    // --- MOTOR DE FRACCIONES EXACTAS ---
+    class Fraction {
+        constructor(n, d = 1) {
+            if (d === 0) throw new Error("Denominador cero");
+            if (n instanceof Fraction) return n;
+
+            if (typeof n === 'number' && !Number.isInteger(n)) {
+                return Fraction.fromNumber(n);
+            }
+
+            let sign = Math.sign(n) * Math.sign(d);
+            n = Math.abs(n);
+            d = Math.abs(d);
+            let g = this.gcd(n, d);
+            this.n = sign * (n / g);
+            this.d = d / g;
+        }
+
+        gcd(a, b) { return b === 0 ? a : this.gcd(b, a % b); }
+        
+        add(f) {
+            f = new Fraction(f.n, f.d);
+            return new Fraction(this.n * f.d + f.n * this.d, this.d * f.d);
+        }
+        sub(f) {
+            f = new Fraction(f.n, f.d);
+            return new Fraction(this.n * f.d - f.n * this.d, this.d * f.d);
+        }
+        mul(f) {
+            f = new Fraction(f.n, f.d);
+            return new Fraction(this.n * f.n, this.d * f.d);
+        }
+        div(f) {
+            f = new Fraction(f.n, f.d);
+            return new Fraction(this.n * f.d, this.d * f.n);
+        }
+        val() { return this.n / this.d; }
+
+        toString() {
+            if (this.n === 0) return "0";
+            if (this.d === 1) return this.n.toString();
+            return `${this.n}/${this.d}`;
+        }
+
+        toDecimalHtml() {
+            if (this.d === 1 || this.n === 0) return "";
+            let num = this.val();
+            let decStr = Number.isInteger(num) ? num.toString() : num.toFixed(3).replace(/\.?0+$/, '');
+            return `<span class="decimal-hint">(~${decStr})</span>`;
+        }
+
+        static fromNumber(num) {
+            if (Number.isInteger(num)) return new Fraction(num, 1);
+            let len = (num.toString().split('.')[1] || '').length;
+            let den = Math.pow(10, len);
+            let numInt = Math.round(num * den);
+            return new Fraction(numInt, den);
+        }
+    }
+
+    let numVars = 0;
+    let numCons = 0;
+
+    function generateForm() {
+        numVars = parseInt(document.getElementById('numVars').value);
+        numCons = parseInt(document.getElementById('numCons').value);
+        
+        let objHtml = `<select id="optType"><option value="max">Maximizar (Z)</option><option value="min">Minimizar (Z)</option></select> <span class="math-text"> = </span>`;
+        for (let i = 1; i <= numVars; i++) {
+            objHtml += `<input type="number" step="any" class="coeff" id="obj_x${i}" value="0"> <span class="math-text">x<sub>${i}</sub></span>`;
+            if (i < numVars) objHtml += `<span class="math-text"> + </span>`;
+        }
+        document.getElementById('objectiveFunc').innerHTML = objHtml;
+
+        let consHtml = '';
+        for (let i = 1; i <= numCons; i++) {
+            consHtml += `<div class="math-row">`;
+            for (let j = 1; j <= numVars; j++) {
+                consHtml += `<input type="number" step="any" class="coeff" id="c${i}_x${j}" value="0"> <span class="math-text">x<sub>${j}</sub></span>`;
+                if (j < numVars) consHtml += `<span class="math-text"> + </span>`;
+            }
+            consHtml += `
+                <select id="eq${i}">
+                    <option value="<=">&le;</option>
+                    <option value="=">=</option>
+                    <option value=">=">&ge;</option>
+                </select>
+                <input type="number" step="any" class="coeff" id="rhs${i}" value="0" style="width:100px;">
+            </div>`;
+        }
+        document.getElementById('constraintsFunc').innerHTML = consHtml;
+        document.getElementById('formContainer').style.display = 'block';
+        document.getElementById('output').innerHTML = ''; 
+    }
+
+    // Helper visual (Combina la fracción exacta con el decimal si lo requiere)
+    function fmt(numObj, showDec = false) {
+        if (!(numObj instanceof Fraction)) numObj = Fraction.fromNumber(numObj);
+        let str = numObj.toString();
+        if (showDec) str += numObj.toDecimalHtml();
+        return str;
+    }
+
+    function solve() {
+        const out = document.getElementById('output');
+        out.innerHTML = '<h2>Resultados del Proceso</h2>';
+        
+        let optType = document.getElementById('optType').value;
+        let objVars = [];
+        for (let i=1; i<=numVars; i++) objVars.push(parseFloat(document.getElementById(`obj_${i}`) || document.getElementById(`obj_x${i}`).value));
+        
+        let constraints = [];
+        for (let i=1; i<=numCons; i++) {
+            let row = [];
+            for (let j=1; j<=numVars; j++) row.push(parseFloat(document.getElementById(`c${i}_x${j}`).value));
+            let type = document.getElementById(`eq${i}`).value;
+            let rhs = parseFloat(document.getElementById(`rhs${i}`).value);
+            
+            if (rhs < 0) {
+                row = row.map(v => -v);
+                rhs = -rhs;
+                type = type === "<=" ? ">=" : (type === ">=" ? "<=" : "=");
+            }
+            constraints.push({coefs: row, type: type, rhs: rhs});
+        }
+
+        let slacks = 0, surplus = 0, arts = 0;
+        constraints.forEach(c => {
+            if (c.type === "<=") slacks++;
+            else if (c.type === ">=") { surplus++; arts++; }
+            else if (c.type === "=") arts++;
+        });
+
+        let augHtml = `<div class="iteration-card"><h3>1. Forma Aumentada Estandarizada</h3>`;
+        let headerNames = ['Base'];
+        for(let i=1; i<=numVars; i++) headerNames.push(`x${i}`);
+        for(let i=1; i<=slacks; i++) headerNames.push(`S${i}`);
+        for(let i=1; i<=surplus; i++) headerNames.push(`E${i}`);
+        for(let i=1; i<=arts; i++) headerNames.push(`A${i}`);
+        headerNames.push('RHS');
+
+        let totalVars = numVars + slacks + surplus + arts;
+        let matrix = [];
+        let baseVars = [];
+        
+        let s_idx = 0, e_idx = 0, a_idx = 0;
+        for (let i=0; i<numCons; i++) {
+            let row = Array.from({length: totalVars + 1}, () => new Fraction(0));
+            for (let j=0; j<numVars; j++) row[j] = Fraction.fromNumber(constraints[i].coefs[j]);
+            row[totalVars] = Fraction.fromNumber(constraints[i].rhs);
+            
+            let eqText = "";
+            for(let j=0; j<numVars; j++) eqText += `${fmt(row[j])}x<sub>${j+1}</sub> + `;
+            
+            if (constraints[i].type === "<=") {
+                row[numVars + s_idx] = new Fraction(1);
+                baseVars.push(`S${s_idx+1}`);
+                eqText += `S<sub>${s_idx+1}</sub> = ${fmt(row[totalVars])}`;
+                s_idx++;
+            } else if (constraints[i].type === ">=") {
+                row[numVars + slacks + e_idx] = new Fraction(-1);
+                row[numVars + slacks + surplus + a_idx] = new Fraction(1);
+                baseVars.push(`A${a_idx+1}`);
+                eqText += `- E<sub>${e_idx+1}</sub> + A<sub>${a_idx+1}</sub> = ${fmt(row[totalVars])}`;
+                e_idx++; a_idx++;
+            } else if (constraints[i].type === "=") {
+                row[numVars + slacks + surplus + a_idx] = new Fraction(1);
+                baseVars.push(`A${a_idx+1}`);
+                eqText += `A<sub>${a_idx+1}</sub> = ${fmt(row[totalVars])}`;
+                a_idx++;
+            }
+            matrix.push(row);
+            augHtml += `<p>${eqText}</p>`;
+        }
+        out.innerHTML += augHtml + `</div>`;
+
+        let requiresPhase1 = arts > 0;
+        let resultMatrix = matrix;
+
+        if (requiresPhase1) {
+            out.innerHTML += `<h2 style="color:var(--primary)"><span class="badge badge-phase1">FASE 1</span> Minimizar Artificiales</h2>`;
+            
+            let wRow = Array.from({length: totalVars + 1}, () => new Fraction(0));
+            for (let i = 0; i < numCons; i++) {
+                if (baseVars[i].startsWith('A')) {
+                    let colIdx = headerNames.indexOf(baseVars[i]) - 1;
+                    wRow[colIdx] = new Fraction(1); 
+                }
+            }
+            
+            for (let i = 0; i < numCons; i++) {
+                if (baseVars[i].startsWith('A')) {
+                    for (let j = 0; j <= totalVars; j++) {
+                        wRow[j] = wRow[j].sub(matrix[i][j]);
+                    }
+                }
+            }
+            
+            resultMatrix = simplexLoop(matrix, wRow, baseVars, headerNames, totalVars, 'W', out);
+            
+            if (Math.abs(resultMatrix.objRow[totalVars].val()) > 1e-6) {
+                out.innerHTML += `<div class="interpretation" style="border-color:red; background:#FEF2F2;"><h3 style="color:red;">El problema No Tiene Solución Factible</h3><p>La Fase 1 terminó y la variable artificial no es cero.</p></div>`;
+                return;
+            }
+            matrix = resultMatrix.matrix;
+            baseVars = resultMatrix.baseVars;
+            out.innerHTML += `<div class="iteration-card"><strong>Fin Fase 1:</strong> Las variables artificiales han salido de la base (W = 0).</div>`;
+        }
+
+        out.innerHTML += `<h2 style="color:var(--secondary)"><span class="badge badge-phase2">FASE 2</span> Optimizar Función Original</h2>`;
+        
+        let zRow = Array.from({length: totalVars + 1}, () => new Fraction(0));
+        let multiplier = optType === 'max' ? -1 : 1;
+        for (let i=0; i<numVars; i++) zRow[i] = Fraction.fromNumber(objVars[i] * multiplier); 
+
+        for (let i = 0; i < numCons; i++) {
+            let bVar = baseVars[i];
+            let colIdx = headerNames.indexOf(bVar) - 1; 
+            let factor = zRow[colIdx];
+            if (Math.abs(factor.val()) > 1e-9) {
+                for (let j = 0; j <= totalVars; j++) {
+                    zRow[j] = zRow[j].sub(factor.mul(matrix[i][j]));
+                }
+            }
+        }
+
+        resultMatrix = simplexLoop(matrix, zRow, baseVars, headerNames, totalVars, 'Z', out);
+
+        // --- INTERPRETACIÓN FINAL ---
+        let finalHtml = `<div class="interpretation"><h3>📊 Interpretación Final de Resultados</h3>`;
+        let zFraction = resultMatrix.objRow[totalVars];
+        if (optType !== 'max') zFraction = zFraction.mul(new Fraction(-1));
+        
+        finalHtml += `<p>El valor óptimo para la función objetivo <strong>${optType.toUpperCase()} Z = ${fmt(zFraction, true)}</strong></p><hr style="margin:1rem 0; border:0; border-top:1px solid #A7F3D0;">`;
+        finalHtml += `<p><strong>Variables de Decisión:</strong></p><ul>`;
+        for (let i=1; i<=numVars; i++) {
+            let val = new Fraction(0);
+            let idx = resultMatrix.baseVars.indexOf(`x${i}`);
+            if (idx !== -1) val = resultMatrix.matrix[idx][totalVars];
+            finalHtml += `<li>x<sub>${i}</sub> = ${fmt(val, true)}</li>`;
+        }
+        finalHtml += `</ul><br><p><strong>Holguras y Excesos:</strong></p><ul>`;
+        for (let i=1; i<=slacks; i++) {
+            let val = new Fraction(0); let idx = resultMatrix.baseVars.indexOf(`S${i}`); if(idx !== -1) val = resultMatrix.matrix[idx][totalVars];
+            finalHtml += `<li>S<sub>${i}</sub> = ${fmt(val, true)} (Unidades sobrantes)</li>`;
+        }
+        for (let i=1; i<=surplus; i++) {
+            let val = new Fraction(0); let idx = resultMatrix.baseVars.indexOf(`E${i}`); if(idx !== -1) val = resultMatrix.matrix[idx][totalVars];
+            finalHtml += `<li>E<sub>${i}</sub> = ${fmt(val, true)} (Excedentes sobre el mínimo)</li>`;
+        }
+        finalHtml += `</ul></div>`;
+        out.innerHTML += finalHtml;
+    }
+
+    function simplexLoop(matrix, objRow, baseVars, headers, totalCols, objName, outDiv) {
+        let iteration = 0;
+        
+        while (true) {
+            let pivotCol = -1;
+            let minVal = -1e-9; 
+            
+            for (let j = 0; j < totalCols; j++) {
+                if (objName === 'Z' && headers[j+1].startsWith('A')) continue;
+                
+                if (objRow[j].val() < minVal) {
+                    minVal = objRow[j].val();
+                    pivotCol = j;
+                }
+            }
+
+            let ratios = new Array(matrix.length).fill(null);
+            let pivotRow = -1;
+            let minRatio = Infinity;
+            
+            if (pivotCol !== -1) {
+                for (let i = 0; i < matrix.length; i++) {
+                    if (matrix[i][pivotCol].val() > 1e-9) { 
+                        let ratio = matrix[i][totalCols].div(matrix[i][pivotCol]);
+                        ratios[i] = ratio;
+                        if (ratio.val() < minRatio) {
+                            minRatio = ratio.val();
+                            pivotRow = i;
+                        }
+                    }
+                }
+            }
+
+            printTableau(matrix, objRow, baseVars, headers, iteration, pivotCol, -1, objName, outDiv, totalCols, ratios);
+
+            if (pivotCol === -1) break; // Óptimo
+            if (pivotRow === -1) {
+                outDiv.innerHTML += `<div class="interpretation" style="border-color:red; background:#FEF2F2;"><h3 style="color:red;">Problema No Acotado</h3></div>`;
+                throw new Error("Unbounded");
+            }
+
+            outDiv.lastChild.remove(); 
+            printTableau(matrix, objRow, baseVars, headers, iteration, pivotCol, pivotRow, objName, outDiv, totalCols, ratios);
+            
+            outDiv.innerHTML += `<div class="iteration-info">
+                Entra: <span>${headers[pivotCol+1]}</span> | Sale: <span>${baseVars[pivotRow]}</span> | Pivote: <span>${fmt(matrix[pivotRow][pivotCol])}</span>
+            </div>`;
+
+            // OPERACIÓN PIVOTE MATRICIAL (Con fracciones)
+            let pVal = matrix[pivotRow][pivotCol];
+            for (let j = 0; j <= totalCols; j++) {
+                matrix[pivotRow][j] = matrix[pivotRow][j].div(pVal);
+            }
+
+            for (let i = 0; i < matrix.length; i++) {
+                if (i !== pivotRow) {
+                    let factor = matrix[i][pivotCol];
+                    for (let j = 0; j <= totalCols; j++) {
+                        matrix[i][j] = matrix[i][j].sub(factor.mul(matrix[pivotRow][j]));
+                    }
+                }
+            }
+            
+            let factorObj = objRow[pivotCol];
+            for (let j = 0; j <= totalCols; j++) {
+                objRow[j] = objRow[j].sub(factorObj.mul(matrix[pivotRow][j]));
+            }
+
+            baseVars[pivotRow] = headers[pivotCol+1]; 
+            iteration++;
+            if(iteration > 30) break;
+        }
+
+        return { matrix: matrix, objRow: objRow, baseVars: baseVars };
+    }
+
+    function printTableau(matrix, objRow, baseVars, headers, iterNum, pCol, pRow, objName, outDiv, totalCols, ratios) {
+        let html = `<div class="iteration-card"><h3>Iteración ${iterNum}</h3>
+        <table><tr><th class="theta-col">&theta;</th>`;
+        
+        headers.forEach((h, i) => {
+            html += `<th ${i === pCol + 1 ? 'class="pivot-col"' : ''}>${h}</th>`;
+        });
+        html += `</tr><tr><td class="theta-cell">-</td><td><strong>${objName}</strong></td>`;
+        
+        for (let j = 0; j <= totalCols; j++) {
+            html += `<td ${j === pCol ? 'class="pivot-col"' : ''}><strong>${fmt(objRow[j])}</strong></td>`;
+        }
+        html += `</tr>`;
+
+        for (let i = 0; i < matrix.length; i++) {
+            let rowClass = (i === pRow) ? 'pivot-row' : '';
+            html += `<tr class="${rowClass}">`;
+            
+            let thetaVal = ratios[i] ? fmt(ratios[i], true) : "-";
+            let thetaClass = (i === pRow) ? 'theta-cell theta-highlight' : 'theta-cell';
+            html += `<td class="${thetaClass}">${thetaVal}</td><td><strong>${baseVars[i]}</strong></td>`;
+            
+            for (let j = 0; j <= totalCols; j++) {
+                let cellClass = (j === pCol) ? 'pivot-col' : '';
+                if (i === pRow && j === pCol) cellClass += ' pivot-cell';
+                html += `<td class="${cellClass}">${fmt(matrix[i][j])}</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</table></div>`;
+        outDiv.innerHTML += html;
+    }
+</script>
+
+</body>
+</html>

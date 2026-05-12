@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Gran M - Completa (Fracciones y Álgebra)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-hover: #4338ca;
+            --bg: #f8fafc; --card-bg: #ffffff;
+            --text-main: #1e293b; --text-muted: #64748b;
+            --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .container { width: 100%; max-width: 1000px; }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { font-weight: 600; color: var(--primary); margin: 0 0 0.5rem 0; font-size: 2.2rem; }
+        .header p { color: var(--text-muted); margin: 0; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; border: 1px solid var(--border); }
+        h2 { font-size: 1.2rem; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bg); padding-bottom: 0.5rem; }
+        
+        .form-group, .restriction-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        select, input { padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; font-family: inherit; outline: none; }
+        select:focus, input:focus { border-color: var(--primary); }
+        input[type="number"] { width: 75px; text-align: center; }
+
+        .btn { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+        .btn-danger { background: #ef4444; padding: 0.4rem 0.8rem; }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: block;
+            width: 100%;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; background: white; white-space: nowrap; }
+        th, td { padding: 0.75rem 1rem; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+        th { background-color: #f1f5f9; font-weight: 600; color: #475569; }
+        
+        .row-z { background-color: #f8fafc; font-weight: 600; }
+        .cell-pivot { background-color: #bef264; font-weight: bold; } 
+        .col-pivot { background-color: #fef08a; } 
+        .row-pivot { background-color: #fed7aa; } 
+
+        .badge { display: inline-block; background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
+        .summary-box { background: #ecfdf5; border: 1px solid #10b981; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; }
+        .summary-box h3 { margin-top: 0; color: #047857; }
+        
+        .function-box { background: #eef2ff; border-left: 4px solid var(--primary); padding: 1.2rem; border-radius: 0 8px 8px 0; margin-bottom: 1rem; color: #312e81; font-size: 1.05rem; }
+        .function-box.alt { background: #f8fafc; border-left-color: #3b82f6; }
+        .function-box code { font-family: monospace; font-size: 1.1rem; color: #1e1b4b; background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; }
+        
+        #results { display: none; }
+        
+        /* Media Queries - Responsividad */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+            }
+            input[type="number"] {
+                width: 65px;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+            th, td {
+                padding: 0.6rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            .header p {
+                font-size: 0.9rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+            h2 {
+                font-size: 1.05rem;
+            }
+            .form-group, .restriction-row {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            input[type="number"] {
+                width: 60px;
+                padding: 0.5rem;
+            }
+            select {
+                padding: 0.5rem;
+            }
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+            table {
+                font-size: 0.75rem;
+                white-space: normal;
+            }
+            th, td {
+                padding: 0.4rem 0.5rem;
+            }
+            .function-box {
+                font-size: 0.95rem;
+                padding: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .header {
+                margin-bottom: 1rem;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+                margin-bottom: 0.3rem;
+            }
+            .header p {
+                font-size: 0.8rem;
+            }
+            .card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            h2 {
+                font-size: 0.95rem;
+                margin-bottom: 1rem;
+            }
+            .form-group, .restriction-row {
+                flex-direction: column;
+                gap: 0.4rem;
+            }
+            .form-group span, .restriction-row span {
+                display: none;
+            }
+            input[type="number"], select {
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            .btn {
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 0.85rem;
+                margin-top: 0.5rem;
+                min-height: 44px;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+            table {
+                font-size: 0.6rem;
+                white-space: nowrap;
+            }
+            th, td {
+                padding: 0.25rem;
+            }
+            .function-box {
+                font-size: 0.8rem;
+                padding: 0.6rem;
+            }
+            .summary-box {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Método de la Gran M</h1>
+        <p>Álgebra, Penalizaciones y Fracciones Exactas</p>
+    </div>
+
+    <div class="card">
+        <h2>1. Función Objetivo</h2>
+        <div class="form-group">
+            <select id="optType">
+                <option value="max">Maximizar (Z)</option>
+                <option value="min" selected>Minimizar (Z)</option>
+            </select>
+            <span> = </span>
+            <input type="number" id="zX1" value="0.6" step="any"> <span>X₁</span>
+            <span> + </span>
+            <input type="number" id="zX2" value="1" step="any"> <span>X₂</span>
+        </div>
+
+        <h2>2. Restricciones</h2>
+        <div id="restrictions-container">
+            <div class="restriction-row" id="row-1">
+                <input type="number" class="r-x1" value="10" step="any"> <span>X₁</span> + 
+                <input type="number" class="r-x2" value="4" step="any"> <span>X₂</span>
+                <select class="r-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=" selected>&ge;</option></select>
+                <input type="number" class="r-rhs" value="20" step="any">
+                <button class="btn btn-danger" onclick="removeRestriction(1)">✕</button>
+            </div>
+            <div class="restriction-row" id="row-2">
+                <input type="number" class="r-x1" value="5" step="any"> <span>X₁</span> + 
+                <input type="number" class="r-x2" value="5" step="any"> <span>X₂</span>
+                <select class="r-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=" selected>&ge;</option></select>
+                <input type="number" class="r-rhs" value="20" step="any">
+                <button class="btn btn-danger" onclick="removeRestriction(2)">✕</button>
+            </div>
+            <div class="restriction-row" id="row-3">
+                <input type="number" class="r-x1" value="2" step="any"> <span>X₁</span> + 
+                <input type="number" class="r-x2" value="6" step="any"> <span>X₂</span>
+                <select class="r-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=" selected>&ge;</option></select>
+                <input type="number" class="r-rhs" value="12" step="any">
+                <button class="btn btn-danger" onclick="removeRestriction(3)">✕</button>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+            <button class="btn btn-outline" onclick="addRestriction()">+ Añadir Restricción</button>
+            <button class="btn" onclick="solve()">Resolver Exactamente</button>
+        </div>
+    </div>
+
+    <div id="results" class="card">
+        <h2>3. Resolución Paso a Paso</h2>
+        <div id="tables-output"></div>
+    </div>
+</div>
+
+<script>
+    let restrictionCount = 3;
+
+    function addRestriction() {
+        restrictionCount++;
+        const container = document.getElementById('restrictions-container');
+        const row = document.createElement('div');
+        row.className = 'restriction-row';
+        row.id = `row-${restrictionCount}`;
+        row.innerHTML = `
+            <input type="number" class="r-x1" value="1" step="any"> <span>X₁</span> + 
+            <input type="number" class="r-x2" value="1" step="any"> <span>X₂</span>
+            <select class="r-op">
+                <option value="<=">&le;</option>
+                <option value="=">=</option>
+                <option value=">=">&ge;</option>
+            </select>
+            <input type="number" class="r-rhs" value="10" step="any">
+            <button class="btn btn-danger" onclick="removeRestriction(${restrictionCount})">✕</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function removeRestriction(id) { document.getElementById(`row-${id}`).remove(); }
+
+    // --- MOTOR MATEMÁTICO RACIONAL (FRACCIONES) ---
+    function gcd(a, b) {
+        a = Math.abs(a); b = Math.abs(b);
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    class Fraction {
+        constructor(n, d = 1) {
+            if (d === 0) throw "Div by zero";
+            let sign = (n < 0) ^ (d < 0) ? -1 : 1;
+            n = Math.abs(n); d = Math.abs(d);
+            let divisor = gcd(n, d);
+            this.n = sign * (n / divisor);
+            this.d = d / divisor;
+        }
+
+        static fromNumber(val) {
+            if (typeof val === 'string') val = parseFloat(val);
+            if (Number.isInteger(val)) return new Fraction(val, 1);
+            let sign = val < 0 ? -1 : 1;
+            val = Math.abs(val);
+            let len = (val.toString().split('.')[1] || '').length;
+            if(len > 6) len = 6; 
+            let den = Math.pow(10, len);
+            let num = Math.round(val * den);
+            return new Fraction(sign * num, den);
+        }
+
+        add(f) { return new Fraction(this.n * f.d + f.n * this.d, this.d * f.d); }
+        sub(f) { return new Fraction(this.n * f.d - f.n * this.d, this.d * f.d); }
+        mul(f) { return new Fraction(this.n * f.n, this.d * f.d); }
+        div(f) { return new Fraction(this.n * f.d, this.d * f.n); }
+        val() { return this.n / this.d; }
+        
+        toString() {
+            if (this.n === 0) return "0";
+            if (this.d === 1) return this.n.toString();
+            return `${this.n}/${this.d}`;
+        }
+    }
+
+    class CNum {
+        constructor(cFrac, mFrac) {
+            this.c = cFrac || new Fraction(0);
+            this.m = mFrac || new Fraction(0);
+        }
+        add(o) { return new CNum(this.c.add(o.c), this.m.add(o.m)); }
+        sub(o) { return new CNum(this.c.sub(o.c), this.m.sub(o.m)); }
+        mul(f) { return new CNum(this.c.mul(f), this.m.mul(f)); }
+        div(f) { return new CNum(this.c.div(f), this.m.div(f)); }
+
+        isNegative() {
+            let mVal = this.m.val();
+            let cVal = this.c.val();
+            return mVal < -1e-6 || (Math.abs(mVal) < 1e-6 && cVal < -1e-6);
+        }
+        isLessThan(o) {
+            let mDiff = this.m.val() - o.m.val();
+            if (Math.abs(mDiff) > 1e-6) return mDiff < 0;
+            return this.c.val() < o.c.val() - 1e-6;
+        }
+
+        format() {
+            let cStr = this.c.toString();
+            let mStr = this.m.toString();
+
+            if (mStr === "0") return cStr;
+
+            let mPart = (mStr === "1" ? "M" : (mStr === "-1" ? "-M" : mStr + "M"));
+            if (cStr === "0") return mPart;
+
+            if (this.m.val() > 0) return `${cStr} + ${mPart}`;
+            
+            mPart = mPart.replace("-", "");
+            return `${cStr} - ${mPart}`;
+        }
+    }
+
+    // Formateador de términos algebraicos
+    function formatTerm(coefFrac, variable, isFirst) {
+        let val = coefFrac.val();
+        if (val === 0) return '';
+        let sign = val > 0 ? '+' : '-';
+        let absFrac = new Fraction(Math.abs(coefFrac.n), coefFrac.d);
+        let coefStr = absFrac.val() === 1 ? '' : absFrac.toString();
+        let str = `${coefStr}${variable}`;
+        if (isFirst) return val < 0 ? `-${str}` : str;
+        return ` ${sign} ${str}`;
+    }
+
+    function solve() {
+        document.getElementById('results').style.display = 'block';
+        const output = document.getElementById('tables-output');
+        output.innerHTML = '';
+
+        const isMin = document.getElementById('optType').value === 'min';
+        let z1 = Fraction.fromNumber(document.getElementById('zX1').value || 0);
+        let z2 = Fraction.fromNumber(document.getElementById('zX2').value || 0);
+
+        const rows = document.querySelectorAll('.restriction-row');
+        let data = [];
+        let sCountTotal = 0, eCountTotal = 0, aCountTotal = 0;
+
+        rows.forEach(r => {
+            let x1 = parseFloat(r.querySelector('.r-x1').value) || 0;
+            let x2 = parseFloat(r.querySelector('.r-x2').value) || 0;
+            let op = r.querySelector('.r-op').value;
+            let rhs = parseFloat(r.querySelector('.r-rhs').value) || 0;
+
+            if (rhs < 0) { x1 = -x1; x2 = -x2; rhs = -rhs; op = (op === '<=') ? '>=' : (op === '>=') ? '<=' : '='; }
+            if (op === '<=') sCountTotal++;
+            else if (op === '>=') { eCountTotal++; aCountTotal++; }
+            else if (op === '=') aCountTotal++;
+            
+            data.push({x1, x2, op, rhs});
+        });
+
+        let targetZ = isMin ? '-Z' : 'Z';
+        
+        // Coeficientes para ecuaciones y formato
+        let c1_max = isMin ? new Fraction(-z1.n, z1.d) : z1;
+        let c2_max = isMin ? new Fraction(-z2.n, z2.d) : z2;
+
+        // 1. FORMA ALGEBRAICA COMPLETA (Eq 0, 1, 2...)
+        let eqLines = [];
+        let zEq = `0: <code>${targetZ}`;
+        zEq += formatTerm(c1_max, 'X₁', false);
+        zEq += formatTerm(c2_max, 'X₂', false);
+        for(let i=1; i<=sCountTotal; i++) zEq += ` + 0S${i}`;
+        for(let i=1; i<=eCountTotal; i++) zEq += ` + 0E${i}`;
+        for(let i=1; i<=aCountTotal; i++) zEq += ` + MA${i}`;
+        zEq += ` = 0</code>`;
+        eqLines.push(zEq);
+
+        let currS = 1, currE = 1, currA = 1;
+        data.forEach((d, idx) => {
+            let eq = `${idx + 1}: <code>`;
+            eq += formatTerm(Fraction.fromNumber(d.x1), 'X₁', true);
+            eq += formatTerm(Fraction.fromNumber(d.x2), 'X₂', false);
+            
+            if (d.op === '<=') {
+                eq += ` + S${currS}`;
+                currS++;
+            } else if (d.op === '>=') {
+                eq += ` - E${currE} + A${currA}`;
+                currE++; currA++;
+            } else if (d.op === '=') {
+                eq += ` + A${currA}`;
+                currA++;
+            }
+            eq += ` = ${Fraction.fromNumber(d.rhs).toString()}</code>`;
+            eqLines.push(eq);
+        });
+
+        // 2. FUNCIÓN A MAXIMIZAR PENALIZADA
+        let eqZ = `Max(${targetZ}) = `;
+        eqZ += formatTerm(c1_max, 'X₁', true);
+        eqZ += formatTerm(c2_max, 'X₂', false);
+        for(let i=1; i<=aCountTotal; i++) eqZ += ` - MA${i}`;
+
+        let eqZero = `${targetZ} `;
+        eqZero += formatTerm(new Fraction(-c1_max.n, c1_max.d), 'X₁', false);
+        eqZero += formatTerm(new Fraction(-c2_max.n, c2_max.d), 'X₂', false);
+        for(let i=1; i<=aCountTotal; i++) eqZero += ` + MA${i}`;
+        eqZero += ` = 0`;
+
+        // Renderizar ambos recuadros
+        output.innerHTML += `
+            <div class="function-box">
+                <strong>Forma Algebraica (Aumentada):</strong><br><br>
+                ${eqLines.join('<br>')}
+            </div>
+            <div class="function-box alt">
+                <strong>Función a Maximizar (Penalizada):</strong><br>
+                <code>${eqZ}</code><br><br>
+                <strong>Fila Z igualada a cero (para la matriz):</strong><br>
+                <code>${eqZero}</code>
+            </div>
+        `;
+
+        // INICIO LÓGICA SIMPLEX
+        let headers = ['X1', 'X2'];
+        let basis = [];
+        sCountTotal = 0; eCountTotal = 0; aCountTotal = 0; // Reiniciar
+        let matrixRows = [];
+
+        data.forEach((d, i) => {
+            if (d.op === '<=') { sCountTotal++; headers.push(`S${sCountTotal}`); basis.push(`S${sCountTotal}`); }
+            else if (d.op === '>=') { eCountTotal++; aCountTotal++; headers.push(`E${eCountTotal}`, `A${aCountTotal}`); basis.push(`A${aCountTotal}`); }
+            else if (d.op === '=') { aCountTotal++; headers.push(`A${aCountTotal}`); basis.push(`A${aCountTotal}`); }
+        });
+        headers.push('RHS');
+        const numCols = headers.length;
+
+        // Fila 0
+        let zRow = new Array(numCols).fill(null).map(() => new CNum());
+        zRow[0] = new CNum(isMin ? z1 : new Fraction(-z1.n, z1.d)); 
+        zRow[1] = new CNum(isMin ? z2 : new Fraction(-z2.n, z2.d));
+        
+        headers.forEach((h, j) => {
+            if (h.startsWith('A')) zRow[j] = new CNum(new Fraction(0), new Fraction(1)); // +1M
+        });
+        matrixRows.push(zRow);
+
+        currS = 1; currE = 1; currA = 1;
+        data.forEach(d => {
+            let row = new Array(numCols).fill(null).map(() => new CNum());
+            row[0] = new CNum(Fraction.fromNumber(d.x1));
+            row[1] = new CNum(Fraction.fromNumber(d.x2));
+            row[numCols - 1] = new CNum(Fraction.fromNumber(d.rhs));
+
+            if (d.op === '<=') { row[headers.indexOf(`S${currS}`)] = new CNum(new Fraction(1)); currS++; } 
+            else if (d.op === '>=') { row[headers.indexOf(`E${currE}`)] = new CNum(new Fraction(-1)); row[headers.indexOf(`A${currA}`)] = new CNum(new Fraction(1)); currE++; currA++; } 
+            else if (d.op === '=') { row[headers.indexOf(`A${currA}`)] = new CNum(new Fraction(1)); currA++; }
+            matrixRows.push(row);
+        });
+
+        // Iteración 0: Eliminar M de la fila Z
+        for(let i = 1; i < matrixRows.length; i++) {
+            if (basis[i-1].startsWith('A')) {
+                for (let j = 0; j < numCols; j++) {
+                    let valToSub = new CNum(new Fraction(0), matrixRows[i][j].c); 
+                    matrixRows[0][j] = matrixRows[0][j].sub(valToSub);
+                }
+            }
+        }
+
+        let iteration = 0;
+        let isOptimal = false;
+
+        while (!isOptimal && iteration < 15) {
+            let enterCol = -1;
+            let minVal = new CNum(new Fraction(0), new Fraction(0));
+            for (let j = 0; j < numCols - 1; j++) {
+                if (matrixRows[0][j].isNegative()) {
+                    if (enterCol === -1 || matrixRows[0][j].isLessThan(minVal)) {
+                        minVal = matrixRows[0][j];
+                        enterCol = j;
+                    }
+                }
+            }
+
+            let leaveRow = -1;
+            let minRatio = Infinity;
+            let thetas = new Array(matrixRows.length).fill('-');
+
+            if (enterCol !== -1) {
+                for (let i = 1; i < matrixRows.length; i++) {
+                    let pivotFrac = matrixRows[i][enterCol].c;
+                    if (pivotFrac.val() > 1e-6) {
+                        let rhsFrac = matrixRows[i][numCols - 1].c;
+                        let ratioFrac = rhsFrac.div(pivotFrac);
+                        let ratioVal = ratioFrac.val();
+                        
+                        // Evaluar si necesita decimal (fracción real) o no
+                        if (ratioFrac.d === 1) {
+                            thetas[i] = ratioFrac.toString();
+                        } else {
+                            thetas[i] = `${ratioFrac.toString()} (${ratioVal.toFixed(2)})`;
+                        }
+                        
+                        if (ratioVal < minRatio) {
+                            minRatio = ratioVal;
+                            leaveRow = i;
+                        }
+                    }
+                }
+            } else {
+                isOptimal = true;
+            }
+
+            renderTable(output, iteration, headers, basis, matrixRows, thetas, enterCol, leaveRow, targetZ);
+
+            if (isOptimal) break;
+            if (leaveRow === -1) { output.innerHTML += `<div class="summary-box">Solución NO ACOTADA.</div>`; break; }
+
+            let pivot = matrixRows[leaveRow][enterCol].c; 
+            
+            for (let j = 0; j < numCols; j++) {
+                matrixRows[leaveRow][j] = matrixRows[leaveRow][j].div(pivot);
+            }
+
+            for (let i = 0; i < matrixRows.length; i++) {
+                if (i !== leaveRow) {
+                    let factor = matrixRows[i][enterCol]; 
+                    for (let j = 0; j < numCols; j++) {
+                        let valPivotC = matrixRows[leaveRow][j].c; 
+                        let scaled = factor.mul(valPivotC); 
+                        matrixRows[i][j] = matrixRows[i][j].sub(scaled);
+                    }
+                }
+            }
+
+            basis[leaveRow - 1] = headers[enterCol];
+            iteration++;
+        }
+
+        if (isOptimal) {
+            let zFrac = matrixRows[0][numCols - 1].c;
+            if (isMin) zFrac = new Fraction(-zFrac.n, zFrac.d); 
+
+            let zStr = zFrac.d === 1 ? zFrac.toString() : `${zFrac.toString()} (${parseFloat(zFrac.val().toFixed(4))})`;
+
+            let resultsHTML = `<div class="summary-box"><h3>✔ Solución Óptima Encontrada</h3>
+                <p><strong>Z = ${zStr}</strong></p><ul>`;
+            
+            headers.slice(0, -1).forEach(h => {
+                let idx = basis.indexOf(h);
+                if(idx !== -1) {
+                    let valFrac = matrixRows[idx + 1][numCols - 1].c;
+                    let valStr = valFrac.d === 1 ? valFrac.toString() : `${valFrac.toString()} (${parseFloat(valFrac.val().toFixed(4))})`;
+                    resultsHTML += `<li><strong>${h}</strong> = ${valStr}</li>`;
+                } else if (h.startsWith('X')) {
+                    resultsHTML += `<li><strong>${h}</strong> = 0</li>`;
+                }
+            });
+            resultsHTML += `</ul></div>`;
+            output.innerHTML += resultsHTML;
+        }
+    }
+
+    function renderTable(container, iterNum, headers, basis, matrixRows, thetas, enterCol, leaveRow, targetZ) {
+        let html = `<div><span class="badge">Iteración ${iterNum}</span></div><div class="table-container"><table>
+            <thead><tr><th>&vartheta; (Theta)</th><th>Base</th><th>Z</th>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+
+        for (let i = 0; i < matrixRows.length; i++) {
+            let isPivotRow = (i === leaveRow);
+            let rowClass = i === 0 ? 'row-z' : (isPivotRow ? 'row-pivot' : '');
+            
+            html += `<tr class="${rowClass}"><td>${i === 0 ? '-' : thetas[i]}</td>
+                <td><strong>${i === 0 ? targetZ : basis[i-1]}</strong></td><td>${i === 0 ? '1' : '0'}</td>`;
+
+            for (let j = 0; j < headers.length; j++) {
+                let cellClass = (isPivotRow && j === enterCol) ? 'cell-pivot' : ((j === enterCol && i !== 0) ? 'col-pivot' : '');
+                html += `<td class="${cellClass}">${matrixRows[i][j].format()}</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</tbody></table></div>`;
+        if (enterCol !== -1 && leaveRow !== -1) {
+            html += `<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 2rem;">➡ Entra: <strong>${headers[enterCol]}</strong> | ⬅ Sale: <strong>${basis[leaveRow-1]}</strong> | Pivote: <strong>${matrixRows[leaveRow][enterCol].c.toString()}</strong></p>`;
+        }
+        container.innerHTML += html;
+    }
+</script>
+
+</body>
+</html>

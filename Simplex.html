@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolución por Método Simplex</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .config-panel { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 10px; }
+        label { font-weight: bold; margin-right: 10px; }
+        input[type="number"] { width: 60px; padding: 5px; margin: 2px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #0056b3; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+            width: 100%;
+        }
+        th, td { border: 1px solid #bdc3c7; padding: 10px; }
+        th { background-color: #34495e; color: white; }
+        .pivot { background-color: #f1c40f; font-weight: bold; }
+        .step-box { background: #fdfefe; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 20px; }
+        .formula { font-family: monospace; font-size: 1.1em; background: #ecf0f1; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0; }
+        .result-box { background: #d4edda; border-color: #c3e6cb; color: #155724; padding: 15px; border-radius: 6px; margin-top: 20px; }
+        
+        /* Media Queries - Responsividad */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 95%;
+                padding: 20px;
+            }
+            input[type="number"] {
+                width: 50px;
+            }
+            table {
+                font-size: 0.9rem;
+            }
+            th, td {
+                padding: 8px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                max-width: 100%;
+                padding: 1.5rem;
+                border-radius: 8px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.15rem;
+            }
+            h3 {
+                font-size: 1rem;
+            }
+            .config-panel {
+                padding: 1rem;
+            }
+            .input-group {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            label {
+                font-size: 0.9rem;
+            }
+            input[type="number"] {
+                width: 50px;
+                padding: 0.4rem;
+            }
+            button {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            table {
+                font-size: 0.75rem;
+            }
+            th, td {
+                padding: 0.5rem;
+            }
+            .step-box {
+                padding: 1rem;
+            }
+            .formula {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem;
+            }
+            .container {
+                max-width: 100%;
+                padding: 1rem;
+                border-radius: 6px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            h2 {
+                font-size: 1rem;
+            }
+            h3 {
+                font-size: 0.9rem;
+            }
+            .config-panel {
+                padding: 0.8rem;
+                border-radius: 4px;
+            }
+            .input-group {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            label {
+                font-size: 0.8rem;
+            }
+            input[type="number"], button {
+                width: 100%;
+                padding: 0.5rem;
+                min-height: 44px;
+            }
+            input[type="number"] {
+                margin: 0.3rem 0;
+            }
+            button {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            table {
+                font-size: 0.6rem;
+                overflow-x: auto;
+                width: 100%;
+                display: block;
+            }
+            th, td {
+                padding: 0.3rem;
+                font-size: 0.6rem;
+            }
+            .step-box {
+                padding: 0.8rem;
+                margin-bottom: 1rem;
+            }
+            .formula {
+                font-size: 0.75rem;
+            }
+            .result-box {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            .result-box ul {
+                padding-left: 1.2rem;
+            }
+            .result-box li {
+                font-size: 0.85rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Resolución por Método Simplex</h1>
+    
+    <div class="config-panel">
+        <div class="input-group">
+            <label>Variables (X):</label> <input type="number" id="numVars" value="2" min="2" max="5">
+            <label>Restricciones (<=):</label> <input type="number" id="numRestr" value="3" min="1" max="5">
+            <button onclick="generarFormulario()">Actualizar Matriz</button>
+        </div>
+        <div id="form-container"></div>
+        <button onclick="resolverSimplex()" style="margin-top: 15px; background-color: #28a745;">Resolver Paso a Paso</button>
+    </div>
+
+    <div id="output"></div>
+</div>
+
+<script>
+    // Clase para manejar Fracciones exactas y evitar decimales/errores de redondeo
+    class Frac {
+        constructor(n, d = 1) {
+            if (d === 0) throw new Error("División por cero");
+            let sign = (n * d < 0) ? -1 : 1;
+            n = Math.abs(n);
+            d = Math.abs(d);
+            let gcd = this._gcd(n, d);
+            this.n = sign * (n / gcd);
+            this.d = d / gcd;
+        }
+        _gcd(a, b) { return b === 0 ? a : this._gcd(b, a % b); }
+        add(f) { return new Frac(this.n * f.d + f.n * this.d, this.d * f.d); }
+        sub(f) { return new Frac(this.n * f.d - f.n * this.d, this.d * f.d); }
+        mul(f) { return new Frac(this.n * f.n, this.d * f.d); }
+        div(f) { return new Frac(this.n * f.d, this.d * f.n); }
+        val() { return this.n / this.d; }
+        toString() { return this.d === 1 ? `${this.n}` : `${this.n}/${this.d}`; }
+        static fromNum(num) { return new Frac(num, 1); }
+    }
+
+    // Inicializar el formulario con el Problema Prototípico
+    window.onload = () => { generarFormulario(); cargarDatosPrototipicos(); };
+
+    function generarFormulario() {
+        const v = parseInt(document.getElementById('numVars').value);
+        const r = parseInt(document.getElementById('numRestr').value);
+        let html = '<h3>Función Objetivo (Maximizar Z)</h3>Z = ';
+        for (let i = 1; i <= v; i++) {
+            html += `<input type="number" id="obj_${i}" value="0"> X${i} ${i < v ? '+' : ''}`;
+        }
+        html += '<h3>Restricciones</h3>';
+        for (let i = 1; i <= r; i++) {
+            html += `<div class="input-group">R${i}: `;
+            for (let j = 1; j <= v; j++) {
+                html += `<input type="number" id="r_${i}_${j}" value="0"> X${j} ${j < v ? '+' : ''}`;
+            }
+            html += ` &nbsp; &le; &nbsp; <input type="number" id="b_${i}" value="0"></div>`;
+        }
+        document.getElementById('form-container').innerHTML = html;
+    }
+
+    function cargarDatosPrototipicos() {
+        document.getElementById('obj_1').value = 3;
+        document.getElementById('obj_2').value = 5;
+        document.getElementById('r_1_1').value = 1; document.getElementById('r_1_2').value = 0; document.getElementById('b_1').value = 4;
+        document.getElementById('r_2_1').value = 0; document.getElementById('r_2_2').value = 2; document.getElementById('b_2').value = 12;
+        document.getElementById('r_3_1').value = 3; document.getElementById('r_3_2').value = 2; document.getElementById('b_3').value = 18;
+    }
+
+    function resolverSimplex() {
+        const out = document.getElementById('output');
+        out.innerHTML = ''; 
+        
+        const v = parseInt(document.getElementById('numVars').value);
+        const r = parseInt(document.getElementById('numRestr').value);
+        
+        let c = []; for(let i=1; i<=v; i++) c.push(parseInt(document.getElementById(`obj_${i}`).value));
+        let A = []; let b = [];
+        for(let i=1; i<=r; i++) {
+            let row = [];
+            for(let j=1; j<=v; j++) row.push(parseInt(document.getElementById(`r_${i}_${j}`).value));
+            A.push(row);
+            b.push(parseInt(document.getElementById(`b_${i}`).value));
+        }
+
+        // 1. Forma Original
+        let fOriginal = `<div class="step-box"><h2>Forma original del modelo</h2><div class="formula">Max Z = ${c.map((coef, i) => `${coef}X${i+1}`).join(' + ')}</div><br><strong>Sujeto a:</strong><br>`;
+        for(let i=0; i<r; i++) {
+            let terms = A[i].map((coef, j) => coef !== 0 ? `${coef}X${j+1}` : '').filter(t => t !== '').join(' + ');
+            fOriginal += `<div class="formula">${terms || '0'} &le; ${b[i]}</div><br>`;
+        }
+        fOriginal += `<div class="formula">X1 ... X${v} &ge; 0</div></div>`;
+        out.innerHTML += fOriginal;
+
+        // 2. Forma Aumentada
+        let fAumentada = `<div class="step-box"><h2>Forma aumentada del modelo</h2><p>Se introducen ${r} variables de holgura (S) para convertir las desigualdades en igualdades equivalentes.</p>`;
+        fAumentada += `<div class="formula">(0) Z ${c.map((coef, i) => coef !== 0 ? `- ${coef}X${i+1}` : '').join(' ')} = 0</div><br>`;
+        for(let i=0; i<r; i++) {
+            let terms = A[i].map((coef, j) => coef !== 0 ? `${coef}X${j+1}` : '').filter(t => t !== '').join(' + ');
+            fAumentada += `<div class="formula">(${i+1}) ${terms || '0'} + S${i+1} = ${b[i]}</div><br>`;
+        }
+        fAumentada += `</div>`;
+        out.innerHTML += fAumentada;
+
+        // 3. Inicializar Matriz Simplex (Tableau)
+        let totalVars = v + r;
+        let varsName = [];
+        for(let i=1; i<=v; i++) varsName.push(`X${i}`);
+        for(let i=1; i<=r; i++) varsName.push(`S${i}`);
+
+        let tableau = [];
+        let basicVars = []; // Guarda el index de la variable básica de cada fila
+
+        // Fila Z (Indice 0)
+        let rowZ = [Frac.fromNum(1)]; // Z
+        for(let i=0; i<v; i++) rowZ.push(Frac.fromNum(-c[i]));
+        for(let i=0; i<r; i++) rowZ.push(Frac.fromNum(0));
+        rowZ.push(Frac.fromNum(0)); // RHS Z
+        tableau.push(rowZ);
+        basicVars.push("Z");
+
+        // Filas Restricciones
+        for(let i=0; i<r; i++) {
+            let row = [Frac.fromNum(0)]; // Z
+            for(let j=0; j<v; j++) row.push(Frac.fromNum(A[i][j])); // X
+            for(let j=0; j<r; j++) row.push(Frac.fromNum(i === j ? 1 : 0)); // S
+            row.push(Frac.fromNum(b[i])); // b
+            tableau.push(row);
+            basicVars.push(`S${i+1}`);
+        }
+
+        let iteracion = 0;
+        let optima = false;
+
+        while(!optima && iteracion < 10) { // Límite de seguridad
+            // Renderizar Tableau Actual
+            let htmlTable = `<h3>Iteración ${iteracion}</h3><table><tr><th>ϑ (b/ColPivot)</th><th>vb</th><th>Z</th>`;
+            varsName.forEach(name => htmlTable += `<th>${name}</th>`);
+            htmlTable += `<th>b</th></tr>`;
+
+            // Buscar Variable de Entrada (más negativa en fila Z)
+            let pivotCol = -1;
+            let minVal = 0;
+            for(let j=1; j<=totalVars; j++) {
+                if(tableau[0][j].val() < minVal) {
+                    minVal = tableau[0][j].val();
+                    pivotCol = j;
+                }
+            }
+
+            if(pivotCol === -1) {
+                optima = true; // No hay negativos, es óptima.
+            }
+
+            // Buscar Variable de Salida (Prueba de cociente mínimo ϑ)
+            let pivotRow = -1;
+            let minRatio = Infinity;
+            let ratios = new Array(r + 1).fill('');
+
+            if(!optima) {
+                for(let i=1; i<=r; i++) {
+                    let pVal = tableau[i][pivotCol].val();
+                    if(pVal > 0) {
+                        let ratio = tableau[i][tableau[i].length - 1].val() / pVal;
+                        ratios[i] = new Frac(tableau[i][tableau[i].length - 1].val()).div(new Frac(pVal)).toString();
+                        if(ratio < minRatio) {
+                            minRatio = ratio;
+                            pivotRow = i;
+                        }
+                    } else {
+                        ratios[i] = '-';
+                    }
+                }
+            }
+
+            // Dibujar filas
+            for(let i=0; i<=r; i++) {
+                htmlTable += `<tr>`;
+                // Columna ϑ
+                if (i === 0) htmlTable += `<td>-</td>`;
+                else htmlTable += `<td>${ratios[i]} ${i === pivotRow ? ' (Mín)' : ''}</td>`;
+                
+                // Columna vb
+                htmlTable += `<td><strong>${basicVars[i]}</strong></td>`;
+                
+                // Valores
+                for(let j=0; j<tableau[i].length; j++) {
+                    let isPivot = (i === pivotRow && j === pivotCol);
+                    htmlTable += `<td class="${isPivot ? 'pivot' : ''}">${tableau[i][j].toString()}</td>`;
+                }
+                htmlTable += `</tr>`;
+            }
+            htmlTable += `</table>`;
+            out.innerHTML += htmlTable;
+
+            if(!optima) {
+                if(pivotRow === -1) {
+                    out.innerHTML += `<p style="color:red">Solución no acotada.</p>`;
+                    break;
+                }
+
+                // Hacer el Pivoteo
+                let pivotElement = tableau[pivotRow][pivotCol];
+                basicVars[pivotRow] = varsName[pivotCol - 1]; // Actualizar VB
+
+                // Dividir fila pivote por el elemento pivote
+                for(let j=0; j<tableau[pivotRow].length; j++) {
+                    tableau[pivotRow][j] = tableau[pivotRow][j].div(pivotElement);
+                }
+
+                // Hacer 0 el resto de la columna
+                for(let i=0; i<=r; i++) {
+                    if(i !== pivotRow) {
+                        let factor = tableau[i][pivotCol];
+                        for(let j=0; j<tableau[i].length; j++) {
+                            tableau[i][j] = tableau[i][j].sub(factor.mul(tableau[pivotRow][j]));
+                        }
+                    }
+                }
+                iteracion++;
+            }
+        }
+
+        // 4. Interpretación
+        let zMax = tableau[0][tableau[0].length - 1].toString();
+        let interp = `<div class="result-box"><h2>Interpretación de la respuesta</h2>`;
+        interp += `<p><strong>Solución Óptima Alcanzada en la Iteración ${iteracion}:</strong></p><ul>`;
+        interp += `<li><strong>Beneficio Máximo (Z):</strong> ${zMax}</li>`;
+        
+        for(let i=1; i<=v; i++) {
+            let varName = `X${i}`;
+            let val = "0";
+            let idx = basicVars.indexOf(varName);
+            if(idx !== -1) val = tableau[idx][tableau[idx].length - 1].toString();
+            interp += `<li><strong>${varName} (Producto ${i}):</strong> Se fabrican ${val} lotes.</li>`;
+        }
+        for(let i=1; i<=r; i++) {
+            let varName = `S${i}`;
+            let val = "0";
+            let idx = basicVars.indexOf(varName);
+            if(idx !== -1) val = tableau[idx][tableau[idx].length - 1].toString();
+            interp += `<li><strong>${varName} (Holgura R${i}):</strong> Queda un remanente de ${val}.</li>`;
+        }
+        interp += `</ul></div>`;
+        out.innerHTML += interp;
+    }
+</script>
+</body>
+</html>
