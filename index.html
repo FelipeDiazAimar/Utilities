@@ -4,317 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IP-Calculator - Métodos de Optimización</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --secondary: #10B981;
-            --tertiary: #F59E0B;
-            --bg-gradient-1: #EEF2FF;
-            --bg-gradient-2: #C7D2FE;
-            --surface: rgba(255, 255, 255, 0.85);
-            --text-main: #1F2937;
-            --text-light: #6B7280;
-            --border: rgba(255, 255, 255, 0.3);
+            --bg:           #000000;
+            --surface:      #1c1c1e;
+            --surface-2:    #252528;
+            --border:       rgba(255,255,255,0.08);
+            --border-hover: rgba(255,255,255,0.18);
+            --text:         rgba(255,255,255,0.92);
+            --text-2:       rgba(255,255,255,0.52);
+            --text-3:       rgba(255,255,255,0.28);
+            --accent:       #0a84ff;
+            --accent-hover: #409cff;
+            --green:        #30d158;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
-            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 3rem 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background: var(--surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-        }
+        .container { width: 100%; max-width: 920px; }
 
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
+        .header { text-align: center; margin-bottom: 3.5rem; }
         .header h1 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), #7C3AED);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            letter-spacing: -0.035em;
+            color: var(--text);
+            margin-bottom: 0.55rem;
+            line-height: 1.1;
         }
-
         .header p {
-            font-size: 1.2rem;
-            color: var(--text-light);
-            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: var(--text-2);
+            font-weight: 400;
+            margin-bottom: 1.25rem;
+            letter-spacing: -0.01em;
         }
-
         .tagline {
-            display: inline-block;
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary);
-            padding: 0.5rem 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            background: rgba(10,132,255,0.1);
+            color: var(--accent);
+            padding: 0.35rem 1rem;
             border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border: 1px solid rgba(10,132,255,0.22);
         }
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
         }
 
         .card {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 1.75rem 1.5rem;
+            border: 1px solid var(--border);
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
             display: flex;
             flex-direction: column;
             text-decoration: none;
             color: inherit;
             cursor: pointer;
+            position: relative;
             overflow: hidden;
         }
-
         .card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(10,132,255,0.06), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border-radius: inherit;
         }
+        .card:hover { transform: translateY(-5px); border-color: var(--border-hover); box-shadow: 0 16px 48px rgba(0,0,0,0.6); }
+        .card:hover::before { opacity: 1; }
 
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-            border-color: var(--primary);
-        }
-
-        .card:hover::before {
-            left: 100%;
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
+        .card-icon { font-size: 2rem; margin-bottom: 1.1rem; line-height: 1; }
         .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-main);
+            font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;
+            color: var(--text); letter-spacing: -0.015em; line-height: 1.3;
         }
-
         .card p {
-            font-size: 0.95rem;
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            flex-grow: 1;
-            line-height: 1.6;
+            font-size: 0.82rem; color: var(--text-2); margin-bottom: 1.25rem;
+            flex-grow: 1; line-height: 1.6;
         }
-
-        .card-features {
-            list-style: none;
-            margin: 1rem 0;
-            font-size: 0.85rem;
-        }
-
+        .card-features { list-style: none; margin: 0 0 1.5rem; }
         .card-features li {
-            padding: 0.3rem 0;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
+            padding: 0.25rem 0; color: var(--text-2); font-size: 0.78rem;
+            display: flex; align-items: center; gap: 0.55rem; line-height: 1.4;
         }
-
         .card-features li::before {
-            content: '✓';
-            color: var(--secondary);
-            font-weight: bold;
-            margin-right: 0.5rem;
+            content: ''; width: 5px; height: 5px; border-radius: 50%;
+            background: var(--green); flex-shrink: 0;
         }
 
         .card-button {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--primary), #7C3AED);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-top: auto;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--accent); color: #fff; padding: 0.62rem 1rem;
+            border-radius: 10px; font-weight: 600; font-size: 0.8rem;
+            transition: background 0.18s ease, transform 0.15s ease;
+            margin-top: auto; text-decoration: none; border: none; cursor: pointer;
         }
-
-        .card-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
-        }
+        .card-button:hover { background: var(--accent-hover); transform: scale(1.025); }
 
         .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.3);
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        .footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Media Queries - Responsividad */
-        @media (max-width: 1024px) {
-            .container {
-                padding: 2rem;
-            }
-            .header h1 {
-                font-size: 2.2rem;
-            }
-            .cards-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 1.5rem;
-            }
+            text-align: center; margin-top: 3rem; padding-top: 1.5rem;
+            border-top: 1px solid var(--border); color: var(--text-3);
+            font-size: 0.76rem; line-height: 1.8;
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .container {
-                padding: 1.5rem;
-                border-radius: 15px;
-            }
-            .header {
-                margin-bottom: 2rem;
-            }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .header p {
-                font-size: 1rem;
-            }
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            .card {
-                padding: 1.5rem;
-            }
-            .card h2 {
-                font-size: 1.3rem;
-            }
-            .card p {
-                font-size: 0.9rem;
-            }
+            body { padding: 2rem 1rem; justify-content: flex-start; }
+            .header { margin-bottom: 2.5rem; }
+            .cards-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .card { padding: 1.4rem; border-radius: 14px; }
         }
-
         @media (max-width: 480px) {
-            body {
-                padding: 0.5rem;
-                min-height: auto;
-            }
-            .container {
-                padding: 1rem;
-                border-radius: 12px;
-            }
-            .header {
-                margin-bottom: 1.5rem;
-            }
-            .header h1 {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-            .header p {
-                font-size: 0.9rem;
-                margin-bottom: 0.5rem;
-            }
-            .tagline {
-                padding: 0.4rem 1rem;
-                font-size: 0.8rem;
-            }
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            .card {
-                padding: 1rem;
-            }
-            .card-icon {
-                font-size: 2rem;
-                margin-bottom: 0.5rem;
-            }
-            .card h2 {
-                font-size: 1.1rem;
-                margin-bottom: 0.3rem;
-            }
-            .card p {
-                font-size: 0.85rem;
-                margin-bottom: 0.5rem;
-            }
-            .card-features {
-                margin: 0.5rem 0;
-                font-size: 0.8rem;
-            }
-            .card-features li {
-                padding: 0.2rem 0;
-            }
-            .card-button {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.85rem;
-                margin-top: 0.8rem;
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .footer {
-                margin-top: 2rem;
-                padding-top: 1rem;
-                font-size: 0.8rem;
-            }
+            body { padding: 1.5rem 0.75rem; }
+            .header h1 { font-size: 1.75rem; }
         }
     </style>
 </head>
@@ -323,24 +151,22 @@
         <div class="header">
             <h1>🧮 IP-Calculator</h1>
             <p>Métodos de Optimización Matemática</p>
-            <div class="tagline">Resolución exacta con fracciones y álgebra</div>
+            <span class="tagline">Resolución exacta con fracciones y álgebra</span>
         </div>
 
         <div class="cards-grid">
-            <!-- Card: Simplex -->
             <a href="Simplex.html" class="card">
                 <div class="card-icon">📊</div>
                 <h2>Método Simplex</h2>
                 <p>Resuelve problemas de programación lineal usando el algoritmo Simplex clásico.</p>
                 <ul class="card-features">
-                    <li>Maximización/Minimización</li>
+                    <li>Maximización / Minimización</li>
                     <li>Fracciones exactas</li>
                     <li>Paso a paso</li>
                 </ul>
-                <button class="card-button">Ir al Simplex →</button>
+                <span class="card-button">Ir al Simplex →</span>
             </a>
 
-            <!-- Card: Dos Fases -->
             <a href="2fases.html" class="card">
                 <div class="card-icon">🔄</div>
                 <h2>Método Dos Fases</h2>
@@ -350,10 +176,9 @@
                     <li>Fase I y Fase II</li>
                     <li>Precisión exacta</li>
                 </ul>
-                <button class="card-button">Ir a Dos Fases →</button>
+                <span class="card-button">Ir a Dos Fases →</span>
             </a>
 
-            <!-- Card: Gran M -->
             <a href="M.html" class="card">
                 <div class="card-icon">🎯</div>
                 <h2>Método de la Gran M</h2>
@@ -363,13 +188,13 @@
                     <li>Fracciones y variables M</li>
                     <li>Una sola fase</li>
                 </ul>
-                <button class="card-button">Ir a Gran M →</button>
+                <span class="card-button">Ir a Gran M →</span>
             </a>
         </div>
 
         <div class="footer">
-            <p>💡 Selecciona un método de optimización para comenzar</p>
-            <p style="margin-top: 1rem; font-size: 0.85rem;">Todos los cálculos utilizan aritmética exacta con fracciones para máxima precisión</p>
+            <p>Selecciona un método para comenzar</p>
+            <p>Todos los cálculos utilizan aritmética exacta con fracciones</p>
         </div>
     </div>
 </body>

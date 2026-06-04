@@ -4,269 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora Gran M - Completa (Fracciones y Álgebra)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-hover: #4338ca;
-            --bg: #f8fafc; --card-bg: #ffffff;
-            --text-main: #1e293b; --text-muted: #64748b;
-            --border: #e2e8f0; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --bg:            #000000;
+            --surface:       #1c1c1e;
+            --surface-2:     #252528;
+            --surface-3:     #3a3a3c;
+            --border:        rgba(255,255,255,0.08);
+            --border-strong: rgba(255,255,255,0.16);
+            --text:          rgba(255,255,255,0.92);
+            --text-2:        rgba(255,255,255,0.52);
+            --text-3:        rgba(255,255,255,0.28);
+            --accent:        #0a84ff;
+            --accent-hover:  #409cff;
+            --green:         #30d158;
+            --red:           #ff453a;
+            --pivot-col:     #bae6fd;
+            --pivot-row:     #7dd3fc;
+            --pivot-cell:    #0ea5e9;
+            --pivot-text:    #000000;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            width: 100%;
-            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; padding: 2rem 1.5rem;
+            display: flex; justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+
         .container { width: 100%; max-width: 1000px; }
+
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: var(--accent); font-size: 0.82rem; font-weight: 500;
+            text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 999px;
+            background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.18);
+            transition: background 0.18s; margin-bottom: 1.75rem;
+        }
+        .nav-back:hover { background: rgba(10,132,255,0.18); }
+
         .header { text-align: center; margin-bottom: 2rem; }
-        .header h1 { font-weight: 600; color: var(--primary); margin: 0 0 0.5rem 0; font-size: 2.2rem; }
-        .header p { color: var(--text-muted); margin: 0; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; border: 1px solid var(--border); }
-        h2 { font-size: 1.2rem; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bg); padding-bottom: 0.5rem; }
-        
-        .form-group, .restriction-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; row-gap: 0.5rem; }
-        select, input { padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; font-family: inherit; outline: none; min-height: 44px; }
-        select:focus, input:focus { border-color: var(--primary); }
+        .header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; color: var(--accent); margin-bottom: 0.3rem; }
+        .header p { color: var(--text-2); font-size: 0.85rem; }
+
+        .card {
+            background: var(--surface); border-radius: 16px; padding: 1.5rem;
+            margin-bottom: 1.25rem; border: 1px solid var(--border);
+        }
+        h2 {
+            font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-3); margin-top: 0; margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;
+        }
+
+        .form-group, .restriction-row {
+            display: flex; align-items: center; gap: 0.65rem;
+            margin-bottom: 0.85rem; flex-wrap: wrap; row-gap: 0.5rem;
+            font-size: 0.88rem; color: var(--text-2);
+        }
+
+        select, input {
+            padding: 0.55rem 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--surface-2); color: var(--text); font-size: 0.88rem;
+            font-family: inherit; outline: none; min-height: 40px;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+        select:focus, input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.2); }
         input[type="number"] { width: 75px; text-align: center; }
 
-        .btn { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background: var(--primary-hover); }
-        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
-        .btn-danger { background: #ef4444; padding: 0.4rem 0.8rem; }
+        .btn {
+            background: var(--accent); color: #fff; border: none; padding: 0.55rem 1.1rem;
+            border-radius: 8px; font-weight: 600; font-size: 0.82rem; font-family: inherit;
+            cursor: pointer; transition: background 0.18s, transform 0.15s; min-height: 40px;
+        }
+        .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: var(--accent); border: 1px solid rgba(10,132,255,0.35); }
+        .btn-outline:hover { background: rgba(10,132,255,0.1); transform: none; }
+        .btn-danger { background: var(--red); padding: 0.4rem 0.75rem; font-size: 0.78rem; min-height: 36px; }
+        .btn-danger:hover { background: #e03030; }
 
         .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 2rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            display: block;
-            width: 100%;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            margin-bottom: 1.5rem; border-radius: 10px; border: 1px solid var(--border);
+            display: block; width: 100%;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 0.95rem; background: white; white-space: nowrap; }
-        th, td { padding: 0.75rem 1rem; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
-        th { background-color: #f1f5f9; font-weight: 600; color: #475569; }
-        
-        .row-z { background-color: #f8fafc; font-weight: 600; }
-        .cell-pivot { background-color: #bef264; font-weight: bold; } 
-        .col-pivot { background-color: #fef08a; } 
-        .row-pivot { background-color: #fed7aa; } 
+        table {
+            width: 100%; border-collapse: collapse; font-size: 0.84rem;
+            background: var(--surface); white-space: nowrap;
+        }
+        th, td {
+            padding: 0.6rem 0.85rem; text-align: center;
+            border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+        }
+        th { background: var(--surface-2); font-weight: 600; color: var(--text-2); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        td { color: var(--text); }
+        tr:last-child td { border-bottom: none; }
+        td:last-child, th:last-child { border-right: none; }
+        .row-z { background: var(--surface-2); font-weight: 600; }
 
-        .badge { display: inline-block; background: var(--primary); color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; }
-        .summary-box { background: #ecfdf5; border: 1px solid #10b981; padding: 1.5rem; border-radius: 8px; margin-top: 1rem; }
-        .summary-box h3 { margin-top: 0; color: #047857; }
-        
-        .function-box { background: #eef2ff; border-left: 4px solid var(--primary); padding: 1.2rem; border-radius: 0 8px 8px 0; margin-bottom: 1rem; color: #312e81; font-size: 1.05rem; }
-        .function-box.alt { background: #f8fafc; border-left-color: #3b82f6; }
-        .function-box code { font-family: monospace; font-size: 1.1rem; color: #1e1b4b; background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; }
-        
+        /* Pivot — celeste */
+        th.col-pivot, td.col-pivot { background: var(--pivot-col) !important; color: var(--pivot-text) !important; }
+        tr.row-pivot               { background: var(--pivot-row) !important; }
+        tr.row-pivot > td          { color: var(--pivot-text) !important; background: var(--pivot-row) !important; }
+        td.cell-pivot {
+            background: var(--pivot-cell) !important; color: var(--pivot-text) !important;
+            font-weight: 700 !important; border: 2px solid #0284c7 !important;
+        }
+
+        .badge {
+            display: inline-block; background: rgba(10,132,255,0.15); color: var(--accent);
+            padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600;
+            margin-bottom: 0.75rem; border: 1px solid rgba(10,132,255,0.25);
+        }
+        .summary-box {
+            background: rgba(48,209,88,0.07); border: 1px solid rgba(48,209,88,0.2);
+            padding: 1.4rem; border-radius: 12px; margin-top: 1rem;
+        }
+        .summary-box h3 { margin-top: 0; color: var(--green); font-size: 0.88rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .summary-box p, .summary-box li { font-size: 0.85rem; color: rgba(255,255,255,0.78); line-height: 1.7; }
+        .summary-box ul { padding-left: 1.2rem; }
+
+        .function-box {
+            background: rgba(10,132,255,0.07); border-left: 3px solid var(--accent);
+            padding: 1.1rem 1.2rem; border-radius: 0 10px 10px 0; margin-bottom: 1rem;
+            color: var(--text); font-size: 0.9rem;
+        }
+        .function-box.alt { background: var(--surface-2); border-left-color: var(--border-strong); }
+        .function-box code {
+            font-family: ui-monospace, 'Menlo', monospace; font-size: 0.88rem;
+            color: var(--text); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;
+        }
+        .function-box strong { color: var(--text-2); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
         #results { display: none; }
-        
-        /* Media Queries - Responsividad */
-        @media (max-width: 1024px) {
-            .container {
-                max-width: 95%;
-            }
-            input[type="number"] {
-                width: 65px;
-            }
-            table {
-                font-size: 0.85rem;
-            }
-            th, td {
-                padding: 0.6rem;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .container {
-                max-width: 100%;
-            }
-            .header h1 {
-                font-size: 1.6rem;
-            }
-            .header p {
-                font-size: 0.9rem;
-            }
-            .card {
-                padding: 1.5rem;
-            }
-            h2 {
-                font-size: 1.05rem;
-            }
-            .form-group, .restriction-row {
-                flex-wrap: wrap;
-                gap: 0.6rem;
-                row-gap: 0.6rem;
-            }
-            .form-group span, .restriction-row span {
-                font-size: 0.95rem;
-            }
-            input[type="number"], select {
-                padding: 0.6rem 0.7rem;
-                font-size: 1rem;
-                min-height: 44px;
-            }
-            input[type="number"] {
-                width: 70px;
-            }
-            .btn {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.9rem;
-                min-height: 44px;
-            }
-            .table-container {
-                overflow-x: auto;
-            }
-            table {
-                font-size: 0.75rem;
-                white-space: normal;
-            }
-            th, td {
-                padding: 0.4rem 0.5rem;
-            }
-            .function-box {
-                font-size: 0.95rem;
-                padding: 0.8rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 0.5rem;
-            }
-            .container {
-                max-width: 100%;
-            }
-            .header {
-                margin-bottom: 1rem;
-            }
-            .header h1 {
-                font-size: 1.3rem;
-                margin-bottom: 0.3rem;
-            }
-            .header p {
-                font-size: 0.8rem;
-            }
-            .card {
-                padding: 1rem;
-                margin-bottom: 1rem;
-            }
-            h2 {
-                font-size: 0.95rem;
-                margin-bottom: 1rem;
-            }
-            .form-group, .restriction-row {
-                flex-direction: column;
-                gap: 0.5rem;
-                width: 100%;
-            }
-            .form-group span, .restriction-row span {
-                display: inline;
-                font-size: 0.85rem;
-                color: var(--text-muted);
-            }
-            input[type="number"], select {
-                width: 100%;
-                padding: 0.7rem 0.8rem;
-                font-size: 1rem;
-                min-height: 44px;
-            }
-            .btn {
-                width: 100%;
-                padding: 0.7rem 1rem;
-                font-size: 0.9rem;
-                margin-top: 0.5rem;
-                min-height: 44px;
-            }
-            .table-container {
-                overflow-x: auto;
-            }
-            table {
-                font-size: 0.6rem;
-                white-space: nowrap;
-            }
-            th, td {
-                padding: 0.25rem;
-            }
-            .function-box {
-                font-size: 0.8rem;
-                padding: 0.6rem;
-            }
-            .summary-box {
-                padding: 1rem;
-                font-size: 0.9rem;
-            }
-        }
-        :root {
-            --bg: #090f1a;
-            --card-bg: #111827;
-            --text-main: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
-        }
-        body { background-color: var(--bg); }
-        .card { background: var(--card-bg); }
-        h2 { border-bottom-color: #1f2937; }
-        select, input { background: #0f172a; color: var(--text-main); border-color: var(--border); }
-        table { background: #0f172a; }
-        th { background-color: #1e293b; color: var(--text-main); }
-        .summary-box { background: #052e1c; border-color: #166534; color: #bbf7d0; }
-        .summary-box h3 { color: #86efac; }
-        .function-box { background: #172554; color: #dbeafe; }
-        .function-box.alt { background: #1e293b; color: #cbd5e1; }
-        .function-box code { background: rgba(15, 23, 42, 0.7); color: #e2e8f0; }
+
+        /* Mobile stepper */
         .mobile-stepper {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            background: #0f172a;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 0.2rem;
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 0.2rem;
         }
         .mobile-stepper > input[type="number"] {
-            margin: 0;
-            border: none;
-            min-width: 62px;
-            width: 62px;
-            text-align: center;
+            margin: 0; border: none; background: transparent;
+            min-width: 62px; width: 62px; text-align: center; box-shadow: none;
         }
+        .mobile-stepper > input[type="number"]:focus { box-shadow: none; border: none; }
         .step-btn {
-            border: 0;
-            min-width: 38px;
-            min-height: 38px;
-            border-radius: 8px;
-            font-weight: 700;
-            color: #e2e8f0;
-            background: #1e293b;
-            touch-action: manipulation;
-            cursor: pointer;
+            border: none; min-width: 38px; min-height: 38px; border-radius: 8px;
+            font-weight: 700; font-size: 0.85rem; color: var(--text-2);
+            background: var(--surface-3); cursor: pointer; touch-action: manipulation;
+            transition: background 0.15s, color 0.15s;
         }
-        .step-btn:hover { background: #334155; }
+        .step-btn:hover { background: var(--border-strong); color: var(--text); transform: none; }
+
+        @media (max-width: 1024px) { input[type="number"] { width: 65px; } table { font-size: 0.8rem; } th, td { padding: 0.5rem; } }
         @media (max-width: 768px) {
+            body { padding: 1.5rem 1rem; }
             .mobile-stepper { width: 100%; justify-content: space-between; }
             .mobile-stepper > input[type="number"] { flex: 1; width: auto; min-width: 0; }
+            table { font-size: 0.75rem; } th, td { padding: 0.4rem 0.5rem; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 1rem 0.75rem; }
+            .card { padding: 1.1rem; border-radius: 12px; }
+            .form-group, .restriction-row { flex-direction: column; gap: 0.4rem; width: 100%; }
+            input[type="number"], select { width: 100%; }
+            .btn { width: 100%; }
+            table { font-size: 0.62rem; } th, td { padding: 0.28rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div style="text-align: center; margin-bottom: 1rem;">
-        <a href="index.html" style="display: inline-block; background: rgba(79, 70, 229, 0.1); color: #4f46e5; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">← Volver al Inicio</a>
+    <div style="text-align: center; margin-bottom: 0.5rem;">
+        <a href="index.html" class="nav-back">← Volver al Inicio</a>
     </div>
     <div class="header">
         <h1>Método de la Gran M</h1>
@@ -289,21 +207,21 @@
         <h2>2. Restricciones</h2>
         <div id="restrictions-container">
             <div class="restriction-row" id="row-1">
-                <input type="number" class="r-x1" value="10" step="any"> <span>X₁</span> + 
+                <input type="number" class="r-x1" value="10" step="any"> <span>X₁</span> +
                 <input type="number" class="r-x2" value="4" step="any"> <span>X₂</span>
                 <select class="r-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=" selected>&ge;</option></select>
                 <input type="number" class="r-rhs" value="20" step="any">
                 <button class="btn btn-danger" onclick="removeRestriction(1)">✕</button>
             </div>
             <div class="restriction-row" id="row-2">
-                <input type="number" class="r-x1" value="5" step="any"> <span>X₁</span> + 
+                <input type="number" class="r-x1" value="5" step="any"> <span>X₁</span> +
                 <input type="number" class="r-x2" value="5" step="any"> <span>X₂</span>
                 <select class="r-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=" selected>&ge;</option></select>
                 <input type="number" class="r-rhs" value="20" step="any">
                 <button class="btn btn-danger" onclick="removeRestriction(2)">✕</button>
             </div>
             <div class="restriction-row" id="row-3">
-                <input type="number" class="r-x1" value="2" step="any"> <span>X₁</span> + 
+                <input type="number" class="r-x1" value="2" step="any"> <span>X₁</span> +
                 <input type="number" class="r-x2" value="6" step="any"> <span>X₂</span>
                 <select class="r-op"><option value="<=">&le;</option><option value="=">=</option><option value=">=" selected>&ge;</option></select>
                 <input type="number" class="r-rhs" value="12" step="any">
@@ -311,7 +229,7 @@
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; gap: 0.75rem; flex-wrap: wrap;">
             <button class="btn btn-outline" onclick="addRestriction()">+ Añadir Restricción</button>
             <button class="btn" onclick="solve()">Resolver Exactamente</button>
         </div>
@@ -333,7 +251,7 @@
         row.className = 'restriction-row';
         row.id = `row-${restrictionCount}`;
         row.innerHTML = `
-            <input type="number" class="r-x1" value="1" step="any"> <span>X₁</span> + 
+            <input type="number" class="r-x1" value="1" step="any"> <span>X₁</span> +
             <input type="number" class="r-x2" value="1" step="any"> <span>X₂</span>
             <select class="r-op">
                 <option value="<=">&le;</option>
@@ -353,27 +271,16 @@
         const inputs = root.querySelectorAll('input[type="number"]');
         inputs.forEach((input) => {
             if (input.dataset.stepper === 'on') return;
-            if (input.closest('.mobile-stepper')) {
-                input.dataset.stepper = 'on';
-                return;
-            }
+            if (input.closest('.mobile-stepper')) { input.dataset.stepper = 'on'; return; }
             const wrapper = document.createElement('div');
             wrapper.className = 'mobile-stepper';
             const minusBtn = document.createElement('button');
-            minusBtn.type = 'button';
-            minusBtn.className = 'step-btn';
-            minusBtn.textContent = '-1';
+            minusBtn.type = 'button'; minusBtn.className = 'step-btn'; minusBtn.textContent = '-1';
             const plusBtn = document.createElement('button');
-            plusBtn.type = 'button';
-            plusBtn.className = 'step-btn';
-            plusBtn.textContent = '+1';
-
+            plusBtn.type = 'button'; plusBtn.className = 'step-btn'; plusBtn.textContent = '+1';
             input.parentNode.insertBefore(wrapper, input);
-            wrapper.appendChild(minusBtn);
-            wrapper.appendChild(input);
-            wrapper.appendChild(plusBtn);
+            wrapper.appendChild(minusBtn); wrapper.appendChild(input); wrapper.appendChild(plusBtn);
             input.dataset.stepper = 'on';
-
             minusBtn.addEventListener('click', () => nudgeInput(input, -1));
             plusBtn.addEventListener('click', () => nudgeInput(input, 1));
         });
@@ -391,15 +298,9 @@
         input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        enhanceNumberInputs(document);
-    });
+    document.addEventListener('DOMContentLoaded', () => { enhanceNumberInputs(document); });
 
-    // --- MOTOR MATEMÁTICO RACIONAL (FRACCIONES) ---
-    function gcd(a, b) {
-        a = Math.abs(a); b = Math.abs(b);
-        return b === 0 ? a : gcd(b, a % b);
-    }
+    function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); return b === 0 ? a : gcd(b, a % b); }
 
     class Fraction {
         constructor(n, d = 1) {
@@ -417,7 +318,7 @@
             let sign = val < 0 ? -1 : 1;
             val = Math.abs(val);
             let len = (val.toString().split('.')[1] || '').length;
-            if(len > 6) len = 6; 
+            if(len > 6) len = 6;
             let den = Math.pow(10, len);
             let num = Math.round(val * den);
             return new Fraction(sign * num, den);
@@ -428,7 +329,7 @@
         mul(f) { return new Fraction(this.n * f.n, this.d * f.d); }
         div(f) { return new Fraction(this.n * f.d, this.d * f.n); }
         val() { return this.n / this.d; }
-        
+
         toString() {
             if (this.n === 0) return "0";
             if (this.d === 1) return this.n.toString();
@@ -447,8 +348,7 @@
         div(f) { return new CNum(this.c.div(f), this.m.div(f)); }
 
         isNegative() {
-            let mVal = this.m.val();
-            let cVal = this.c.val();
+            let mVal = this.m.val(), cVal = this.c.val();
             return mVal < -1e-6 || (Math.abs(mVal) < 1e-6 && cVal < -1e-6);
         }
         isLessThan(o) {
@@ -458,22 +358,16 @@
         }
 
         format() {
-            let cStr = this.c.toString();
-            let mStr = this.m.toString();
-
+            let cStr = this.c.toString(), mStr = this.m.toString();
             if (mStr === "0") return cStr;
-
             let mPart = (mStr === "1" ? "M" : (mStr === "-1" ? "-M" : mStr + "M"));
             if (cStr === "0") return mPart;
-
             if (this.m.val() > 0) return `${cStr} + ${mPart}`;
-            
             mPart = mPart.replace("-", "");
             return `${cStr} - ${mPart}`;
         }
     }
 
-    // Formateador de términos algebraicos
     function formatTerm(coefFrac, variable, isFirst) {
         let val = coefFrac.val();
         if (val === 0) return '';
@@ -508,17 +402,13 @@
             if (op === '<=') sCountTotal++;
             else if (op === '>=') { eCountTotal++; aCountTotal++; }
             else if (op === '=') aCountTotal++;
-            
             data.push({x1, x2, op, rhs});
         });
 
         let targetZ = isMin ? '-Z' : 'Z';
-        
-        // Coeficientes para ecuaciones y formato
         let c1_max = isMin ? new Fraction(-z1.n, z1.d) : z1;
         let c2_max = isMin ? new Fraction(-z2.n, z2.d) : z2;
 
-        // 1. FORMA ALGEBRAICA COMPLETA (Eq 0, 1, 2...)
         let eqLines = [];
         let zEq = `0: <code>${targetZ}`;
         zEq += formatTerm(c1_max, 'X₁', false);
@@ -534,22 +424,13 @@
             let eq = `${idx + 1}: <code>`;
             eq += formatTerm(Fraction.fromNumber(d.x1), 'X₁', true);
             eq += formatTerm(Fraction.fromNumber(d.x2), 'X₂', false);
-            
-            if (d.op === '<=') {
-                eq += ` + S${currS}`;
-                currS++;
-            } else if (d.op === '>=') {
-                eq += ` - E${currE} + A${currA}`;
-                currE++; currA++;
-            } else if (d.op === '=') {
-                eq += ` + A${currA}`;
-                currA++;
-            }
+            if (d.op === '<=') { eq += ` + S${currS}`; currS++; }
+            else if (d.op === '>=') { eq += ` - E${currE} + A${currA}`; currE++; currA++; }
+            else if (d.op === '=') { eq += ` + A${currA}`; currA++; }
             eq += ` = ${Fraction.fromNumber(d.rhs).toString()}</code>`;
             eqLines.push(eq);
         });
 
-        // 2. FUNCIÓN A MAXIMIZAR PENALIZADA
         let eqZ = `Max(${targetZ}) = `;
         eqZ += formatTerm(c1_max, 'X₁', true);
         eqZ += formatTerm(c2_max, 'X₂', false);
@@ -561,7 +442,6 @@
         for(let i=1; i<=aCountTotal; i++) eqZero += ` + MA${i}`;
         eqZero += ` = 0`;
 
-        // Renderizar ambos recuadros
         output.innerHTML += `
             <div class="function-box">
                 <strong>Forma Algebraica (Aumentada):</strong><br><br>
@@ -575,10 +455,9 @@
             </div>
         `;
 
-        // INICIO LÓGICA SIMPLEX
         let headers = ['X1', 'X2'];
         let basis = [];
-        sCountTotal = 0; eCountTotal = 0; aCountTotal = 0; // Reiniciar
+        sCountTotal = 0; eCountTotal = 0; aCountTotal = 0;
         let matrixRows = [];
 
         data.forEach((d, i) => {
@@ -589,14 +468,10 @@
         headers.push('RHS');
         const numCols = headers.length;
 
-        // Fila 0
         let zRow = new Array(numCols).fill(null).map(() => new CNum());
-        zRow[0] = new CNum(isMin ? z1 : new Fraction(-z1.n, z1.d)); 
+        zRow[0] = new CNum(isMin ? z1 : new Fraction(-z1.n, z1.d));
         zRow[1] = new CNum(isMin ? z2 : new Fraction(-z2.n, z2.d));
-        
-        headers.forEach((h, j) => {
-            if (h.startsWith('A')) zRow[j] = new CNum(new Fraction(0), new Fraction(1)); // +1M
-        });
+        headers.forEach((h, j) => { if (h.startsWith('A')) zRow[j] = new CNum(new Fraction(0), new Fraction(1)); });
         matrixRows.push(zRow);
 
         currS = 1; currE = 1; currA = 1;
@@ -605,18 +480,16 @@
             row[0] = new CNum(Fraction.fromNumber(d.x1));
             row[1] = new CNum(Fraction.fromNumber(d.x2));
             row[numCols - 1] = new CNum(Fraction.fromNumber(d.rhs));
-
-            if (d.op === '<=') { row[headers.indexOf(`S${currS}`)] = new CNum(new Fraction(1)); currS++; } 
-            else if (d.op === '>=') { row[headers.indexOf(`E${currE}`)] = new CNum(new Fraction(-1)); row[headers.indexOf(`A${currA}`)] = new CNum(new Fraction(1)); currE++; currA++; } 
+            if (d.op === '<=') { row[headers.indexOf(`S${currS}`)] = new CNum(new Fraction(1)); currS++; }
+            else if (d.op === '>=') { row[headers.indexOf(`E${currE}`)] = new CNum(new Fraction(-1)); row[headers.indexOf(`A${currA}`)] = new CNum(new Fraction(1)); currE++; currA++; }
             else if (d.op === '=') { row[headers.indexOf(`A${currA}`)] = new CNum(new Fraction(1)); currA++; }
             matrixRows.push(row);
         });
 
-        // Iteración 0: Eliminar M de la fila Z
         for(let i = 1; i < matrixRows.length; i++) {
             if (basis[i-1].startsWith('A')) {
                 for (let j = 0; j < numCols; j++) {
-                    let valToSub = new CNum(new Fraction(0), matrixRows[i][j].c); 
+                    let valToSub = new CNum(new Fraction(0), matrixRows[i][j].c);
                     matrixRows[0][j] = matrixRows[0][j].sub(valToSub);
                 }
             }
@@ -631,14 +504,12 @@
             for (let j = 0; j < numCols - 1; j++) {
                 if (matrixRows[0][j].isNegative()) {
                     if (enterCol === -1 || matrixRows[0][j].isLessThan(minVal)) {
-                        minVal = matrixRows[0][j];
-                        enterCol = j;
+                        minVal = matrixRows[0][j]; enterCol = j;
                     }
                 }
             }
 
-            let leaveRow = -1;
-            let minRatio = Infinity;
+            let leaveRow = -1, minRatio = Infinity;
             let thetas = new Array(matrixRows.length).fill('-');
 
             if (enterCol !== -1) {
@@ -648,18 +519,8 @@
                         let rhsFrac = matrixRows[i][numCols - 1].c;
                         let ratioFrac = rhsFrac.div(pivotFrac);
                         let ratioVal = ratioFrac.val();
-                        
-                        // Evaluar si necesita decimal (fracción real) o no
-                        if (ratioFrac.d === 1) {
-                            thetas[i] = ratioFrac.toString();
-                        } else {
-                            thetas[i] = `${ratioFrac.toString()} (${ratioVal.toFixed(2)})`;
-                        }
-                        
-                        if (ratioVal < minRatio) {
-                            minRatio = ratioVal;
-                            leaveRow = i;
-                        }
+                        thetas[i] = ratioFrac.d === 1 ? ratioFrac.toString() : `${ratioFrac.toString()} (${ratioVal.toFixed(2)})`;
+                        if (ratioVal < minRatio) { minRatio = ratioVal; leaveRow = i; }
                     }
                 }
             } else {
@@ -671,19 +532,14 @@
             if (isOptimal) break;
             if (leaveRow === -1) { output.innerHTML += `<div class="summary-box">Solución NO ACOTADA.</div>`; break; }
 
-            let pivot = matrixRows[leaveRow][enterCol].c; 
-            
-            for (let j = 0; j < numCols; j++) {
-                matrixRows[leaveRow][j] = matrixRows[leaveRow][j].div(pivot);
-            }
+            let pivot = matrixRows[leaveRow][enterCol].c;
+            for (let j = 0; j < numCols; j++) { matrixRows[leaveRow][j] = matrixRows[leaveRow][j].div(pivot); }
 
             for (let i = 0; i < matrixRows.length; i++) {
                 if (i !== leaveRow) {
-                    let factor = matrixRows[i][enterCol]; 
+                    let factor = matrixRows[i][enterCol];
                     for (let j = 0; j < numCols; j++) {
-                        let valPivotC = matrixRows[leaveRow][j].c; 
-                        let scaled = factor.mul(valPivotC); 
-                        matrixRows[i][j] = matrixRows[i][j].sub(scaled);
+                        matrixRows[i][j] = matrixRows[i][j].sub(factor.mul(matrixRows[leaveRow][j].c));
                     }
                 }
             }
@@ -694,13 +550,11 @@
 
         if (isOptimal) {
             let zFrac = matrixRows[0][numCols - 1].c;
-            if (isMin) zFrac = new Fraction(-zFrac.n, zFrac.d); 
-
+            if (isMin) zFrac = new Fraction(-zFrac.n, zFrac.d);
             let zStr = zFrac.d === 1 ? zFrac.toString() : `${zFrac.toString()} (${parseFloat(zFrac.val().toFixed(4))})`;
 
             let resultsHTML = `<div class="summary-box"><h3>✔ Solución Óptima Encontrada</h3>
                 <p><strong>Z = ${zStr}</strong></p><ul>`;
-            
             headers.slice(0, -1).forEach(h => {
                 let idx = basis.indexOf(h);
                 if(idx !== -1) {
@@ -718,24 +572,33 @@
 
     function renderTable(container, iterNum, headers, basis, matrixRows, thetas, enterCol, leaveRow, targetZ) {
         let html = `<div><span class="badge">Iteración ${iterNum}</span></div><div class="table-container"><table>
-            <thead><tr><th>&vartheta; (Theta)</th><th>Base</th><th>Z</th>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+            <thead><tr>
+                <th>&vartheta;</th><th>Base</th><th>Z</th>
+                ${headers.map((h, j) => `<th${j === enterCol ? ' class="col-pivot"' : ''}>${h}</th>`).join('')}
+            </tr></thead><tbody>`;
 
         for (let i = 0; i < matrixRows.length; i++) {
             let isPivotRow = (i === leaveRow);
             let rowClass = i === 0 ? 'row-z' : (isPivotRow ? 'row-pivot' : '');
-            
-            html += `<tr class="${rowClass}"><td>${i === 0 ? '-' : thetas[i]}</td>
-                <td><strong>${i === 0 ? targetZ : basis[i-1]}</strong></td><td>${i === 0 ? '1' : '0'}</td>`;
+
+            html += `<tr class="${rowClass}">
+                <td>${i === 0 ? '-' : thetas[i]}</td>
+                <td><strong>${i === 0 ? targetZ : basis[i-1]}</strong></td>
+                <td>${i === 0 ? '1' : '0'}</td>`;
 
             for (let j = 0; j < headers.length; j++) {
-                let cellClass = (isPivotRow && j === enterCol) ? 'cell-pivot' : ((j === enterCol && i !== 0) ? 'col-pivot' : '');
+                let cellClass = (isPivotRow && j === enterCol) ? 'cell-pivot' : (j === enterCol ? 'col-pivot' : '');
                 html += `<td class="${cellClass}">${matrixRows[i][j].format()}</td>`;
             }
             html += `</tr>`;
         }
         html += `</tbody></table></div>`;
         if (enterCol !== -1 && leaveRow !== -1) {
-            html += `<p style="font-size: 0.9rem; color: #64748b; margin-bottom: 2rem;">➡ Entra: <strong>${headers[enterCol]}</strong> | ⬅ Sale: <strong>${basis[leaveRow-1]}</strong> | Pivote: <strong>${matrixRows[leaveRow][enterCol].c.toString()}</strong></p>`;
+            html += `<p style="font-size:0.8rem;color:var(--text-2);margin-bottom:1.5rem;padding:0 0.25rem;">
+                ➡ Entra: <strong style="color:var(--accent)">${headers[enterCol]}</strong> &nbsp;|&nbsp;
+                ⬅ Sale: <strong style="color:var(--accent)">${basis[leaveRow-1]}</strong> &nbsp;|&nbsp;
+                Pivote: <strong style="color:var(--accent)">${matrixRows[leaveRow][enterCol].c.toString()}</strong>
+            </p>`;
         }
         container.innerHTML += html;
     }
