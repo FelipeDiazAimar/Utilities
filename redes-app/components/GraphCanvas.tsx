@@ -406,8 +406,16 @@ export default function GraphCanvas() {
       .filter((n: any) => !n.isGhostLabel && !storeNodeIds.has(n.id))
       .map((n: any) => n.id);
     if (staleNodeIds.length > 0) nodesData.remove(staleNodeIds);
+    const nodeFont = { color: isDarkTheme ? '#e0e0e0' : '#333', strokeWidth: 0 };
     nodesData.update(
-      storeNodes.map((n) => ({ id: n.id, label: n.id, x: n.x, y: n.y, color: getNodeColorConfig(isDarkTheme) }))
+      storeNodes.map((n) => ({
+        id: n.id,
+        label: n.id,
+        x: n.x,
+        y: n.y,
+        color: getNodeColorConfig(isDarkTheme),
+        font: nodeFont,
+      }))
     );
 
     const storeEdgeIds = new Set(storeEdges.map((e) => e.id));
