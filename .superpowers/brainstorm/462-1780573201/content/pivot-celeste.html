@@ -1,0 +1,100 @@
+<h2>Marcado Pivot — Gama Celeste</h2>
+<p class="subtitle">Columna más clara → fila media → celda pivote más oscura. Todo con texto negro.</p>
+
+<div class="section">
+  <div style="overflow-x:auto; margin: 1.5rem 0;">
+    <table style="width:100%; border-collapse:collapse; font-family:monospace; font-size:0.9rem;">
+      <thead>
+        <tr style="background:#1e293b; color:#e5e7eb;">
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155;">θ</th>
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155;">Base</th>
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155;">Z</th>
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155; background:#bae6fd; color:#000;">X1 ← col</th>
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155;">X2</th>
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155;">S1</th>
+          <th style="padding:0.6rem 0.8rem; border:1px solid #334155;">RHS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#0f172a;">
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">-</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb; font-weight:bold;">Z</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">1</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; background:#bae6fd; color:#000;">-3</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">-5</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">0</td>
+        </tr>
+        <tr style="background:#0f172a;">
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">4</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb; font-weight:bold;">S1</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; background:#bae6fd; color:#000;">1</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">1</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">4</td>
+        </tr>
+        <tr style="background:#7dd3fc;">
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#000; font-weight:bold;">3 ★</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#000; font-weight:bold;">S2 ← fila</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#000;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; background:#0ea5e9; color:#000; font-weight:bold; border:2px solid #0369a1;">3 ← PIVOTE</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#000;">2</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#000;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#000;">9</td>
+        </tr>
+        <tr style="background:#0f172a;">
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">6</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb; font-weight:bold;">S3</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; background:#bae6fd; color:#000;">3</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">2</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">0</td>
+          <td style="padding:0.6rem 0.8rem; border:1px solid #334155; color:#e5e7eb;">18</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="display:flex; gap:1.2rem; flex-wrap:wrap; margin-top:1rem;">
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <div style="width:24px; height:24px; background:#0ea5e9; border-radius:4px; border:2px solid #0369a1;"></div>
+      <span style="font-size:0.85rem;"><strong style="color:#38bdf8;">#0ea5e9</strong> — celda pivote (más oscuro)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <div style="width:24px; height:24px; background:#7dd3fc; border-radius:4px;"></div>
+      <span style="font-size:0.85rem;"><strong style="color:#7dd3fc;">#7dd3fc</strong> — fila pivote (medio)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+      <div style="width:24px; height:24px; background:#bae6fd; border-radius:4px;"></div>
+      <span style="font-size:0.85rem;"><strong style="color:#bae6fd;">#bae6fd</strong> — columna pivote (más claro)</span>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:2rem;">
+  <h3>¿Te gusta esta gama o ajustamos algo?</h3>
+  <div class="options">
+    <div class="option" data-choice="confirm" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>Sí, esta gama celeste</h3>
+        <p>Columna #bae6fd → fila #7dd3fc → celda #0ea5e9. Texto negro en todos. Aplicar en los 4 archivos.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="darker" onclick="toggleSelect(this)">
+      <div class="letter">↓</div>
+      <div class="content">
+        <h3>Más oscuro en general</h3>
+        <p>Subir la oscuridad de toda la gama, manteniendo la progresión claro→medio→oscuro.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="lighter" onclick="toggleSelect(this)">
+      <div class="letter">↑</div>
+      <div class="content">
+        <h3>Más claro / suave en general</h3>
+        <p>Bajar la saturación, tonos más pastel para que sean más sutiles sobre el fondo oscuro.</p>
+      </div>
+    </div>
+  </div>
+</div>

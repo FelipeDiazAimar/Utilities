@@ -1,0 +1,44 @@
+<h2>¿Cómo unificar el tema de <code>index.html</code>?</h2>
+<p class="subtitle">Las 3 calculadoras (Simplex, 2 Fases, Gran M) ya son oscuras. ¿Qué hacemos con la pantalla de inicio?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="dark" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0b1220; padding:1.2rem; border-radius:8px; min-height:160px;">
+      <div style="background:linear-gradient(135deg,#020617,#0f172a); border-radius:12px; padding:1.5rem; text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">🧮</div>
+        <div style="color:#60a5fa; font-weight:700; font-size:1.1rem; margin-bottom:0.3rem;">IP-Calculator</div>
+        <div style="color:#94a3b8; font-size:0.8rem; margin-bottom:1rem;">Métodos de Optimización</div>
+        <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+          <div style="background:#111827; border:1px solid #334155; border-radius:8px; padding:0.6rem 0.8rem; color:#e5e7eb; font-size:0.7rem;">📊 Simplex</div>
+          <div style="background:#111827; border:1px solid #334155; border-radius:8px; padding:0.6rem 0.8rem; color:#e5e7eb; font-size:0.7rem;">🔄 Dos Fases</div>
+          <div style="background:#111827; border:1px solid #334155; border-radius:8px; padding:0.6rem 0.8rem; color:#e5e7eb; font-size:0.7rem;">🎯 Gran M</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Oscuro — igual que las calculadoras</h3>
+      <p>index.html adopta el mismo fondo oscuro (#0b1220) y paleta azul que M.html, Simplex y 2 Fases. Experiencia 100% consistente.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="light" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#EEF2FF,#C7D2FE); padding:1.2rem; border-radius:8px; min-height:160px;">
+      <div style="background:rgba(255,255,255,0.85); border-radius:12px; padding:1.5rem; text-align:center;">
+        <div style="font-size:2rem; margin-bottom:0.5rem;">🧮</div>
+        <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:700; font-size:1.1rem; margin-bottom:0.3rem;">IP-Calculator</div>
+        <div style="color:#6B7280; font-size:0.8rem; margin-bottom:1rem;">Métodos de Optimización</div>
+        <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+          <div style="background:white; border-radius:8px; padding:0.6rem 0.8rem; color:#1F2937; font-size:0.7rem; box-shadow:0 2px 8px rgba(0,0,0,0.08);">📊 Simplex</div>
+          <div style="background:white; border-radius:8px; padding:0.6rem 0.8rem; color:#1F2937; font-size:0.7rem; box-shadow:0 2px 8px rgba(0,0,0,0.08);">🔄 Dos Fases</div>
+          <div style="background:white; border-radius:8px; padding:0.6rem 0.8rem; color:#1F2937; font-size:0.7rem; box-shadow:0 2px 8px rgba(0,0,0,0.08);">🎯 Gran M</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Claro — mantener el diseño actual</h3>
+      <p>index.html conserva su gradiente violeta-azul claro actual. Las 3 calculadoras se unifican entre sí (dark), pero el inicio queda diferente.</p>
+    </div>
+  </div>
+
+</div>

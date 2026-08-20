@@ -4,271 +4,228 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resolución por Método Simplex</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            width: 100%;
-            box-sizing: border-box;
+        :root {
+            --bg:            #000000;
+            --surface:       #1c1c1e;
+            --surface-2:     #252528;
+            --surface-3:     #3a3a3c;
+            --border:        rgba(255,255,255,0.08);
+            --border-strong: rgba(255,255,255,0.16);
+            --text:          rgba(255,255,255,0.92);
+            --text-2:        rgba(255,255,255,0.52);
+            --text-3:        rgba(255,255,255,0.28);
+            --accent:        #0a84ff;
+            --accent-hover:  #409cff;
+            --green:         #30d158;
+            --red:           #ff453a;
+            --pivot-col:     #bae6fd;
+            --pivot-row:     #7dd3fc;
+            --pivot-cell:    #0ea5e9;
+            --pivot-text:    #000000;
         }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
-        .config-panel { background: #e9ecef; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-        .input-group { margin-bottom: 10px; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; row-gap: 0.5rem; }
-        label { font-weight: bold; margin-right: 10px; font-size: 0.95rem; }
-        input[type="number"] { width: 60px; padding: 8px 6px; margin: 2px; border: 1px solid #ccc; border-radius: 4px; min-height: 44px; font-size: 1rem; }
-        button { background-color: #007bff; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.3s; }
-        button:hover { background-color: #0056b3; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .page { width: 100%; max-width: 1000px; margin: 0 auto; }
+
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: var(--accent); font-size: 0.82rem; font-weight: 500;
+            text-decoration: none; padding: 0.4rem 0.85rem; border-radius: 999px;
+            background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.18);
+            transition: background 0.18s; margin-bottom: 1.75rem;
+        }
+        .nav-back:hover { background: rgba(10,132,255,0.18); }
+
+        .page-title {
+            font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em;
+            margin-bottom: 1.5rem; color: var(--text);
+        }
+
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem;
+        }
+        .card-title {
+            font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 1.1rem;
+        }
+
+        .input-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            flex-wrap: wrap; row-gap: 0.75rem; margin-bottom: 0.75rem;
+        }
+        .input-label { font-size: 0.82rem; font-weight: 500; color: var(--text-2); white-space: nowrap; }
+
+        input[type="number"] {
+            width: 70px; padding: 0.55rem 0.65rem; background: var(--surface-2);
+            color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+            font-size: 0.9rem; font-family: inherit; text-align: center; outline: none;
+            transition: border-color 0.18s, box-shadow 0.18s; min-height: 40px;
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,132,255,0.2);
+        }
+
+        button {
+            padding: 0.55rem 1.1rem; background: var(--accent); color: #fff;
+            border: none; border-radius: 8px; font-family: inherit; font-weight: 600;
+            font-size: 0.82rem; cursor: pointer; transition: background 0.18s, transform 0.15s;
+            min-height: 40px;
+        }
+        button:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        button.btn-green { background: var(--green); }
+        button.btn-green:hover { background: #25b04c; }
+
+        #form-container { margin-top: 1rem; }
+        #form-container h3 {
+            font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-3); margin: 1.2rem 0 0.75rem;
+        }
+        .input-group {
+            display: flex; align-items: center; gap: 0.5rem;
+            flex-wrap: wrap; row-gap: 0.6rem; margin-bottom: 0.6rem;
+            font-size: 0.88rem; color: var(--text-2);
+        }
+
+        .step-box {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.4rem; margin-bottom: 1rem;
+            border-left: 3px solid var(--accent);
+        }
+        .step-box h2 {
+            font-size: 0.88rem; font-weight: 600; color: var(--text);
+            margin-bottom: 0.9rem; letter-spacing: -0.01em;
+        }
+
+        .formula {
+            font-family: ui-monospace, 'Menlo', monospace;
+            font-size: 0.85rem; background: var(--surface-2); color: var(--text);
+            padding: 0.4rem 0.75rem; border-radius: 6px; display: inline-block;
+            margin: 0.3rem 0; border: 1px solid var(--border);
+        }
+
+        .result-box {
+            background: rgba(48,209,88,0.07); border: 1px solid rgba(48,209,88,0.25);
+            border-radius: 14px; padding: 1.4rem; margin-top: 1.25rem;
+        }
+        .result-box h2 { font-size: 0.88rem; font-weight: 600; color: var(--green); margin-bottom: 0.9rem; }
+        .result-box p, .result-box li { font-size: 0.85rem; color: rgba(255,255,255,0.78); line-height: 1.7; }
+        .result-box ul { padding-left: 1.2rem; }
+
+        h3.iter-title {
+            font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-3); margin: 1.5rem 0 0.6rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            border-radius: 10px; border: 1px solid var(--border); margin-bottom: 1rem;
+        }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            margin-bottom: 30px;
+            width: 100%; border-collapse: collapse; font-size: 0.84rem;
+            background: var(--surface); white-space: nowrap;
+        }
+        th {
+            background: var(--surface-2); color: var(--text-2); font-weight: 600;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+            padding: 0.65rem 0.85rem; border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+        td {
+            padding: 0.6rem 0.85rem; color: var(--text);
+            border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
             text-align: center;
         }
-        table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            display: block;
-            width: 100%;
+        tr:last-child td { border-bottom: none; }
+        td:last-child, th:last-child { border-right: none; }
+
+        /* Pivot — celeste */
+        th.col-pivot  { background: var(--pivot-col) !important; color: var(--pivot-text) !important; }
+        td.col-pivot  { background: var(--pivot-col) !important; color: var(--pivot-text) !important; }
+        tr.row-pivot  { background: var(--pivot-row) !important; }
+        tr.row-pivot > td { color: var(--pivot-text) !important; background: var(--pivot-row) !important; }
+        td.cell-pivot {
+            background: var(--pivot-cell) !important; color: var(--pivot-text) !important;
+            font-weight: 700 !important; border: 2px solid #0284c7 !important;
         }
-        th, td { border: 1px solid #bdc3c7; padding: 10px; }
-        th { background-color: #34495e; color: white; }
-        .pivot { background-color: #f1c40f; font-weight: bold; }
-        .step-box { background: #fdfefe; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 20px; }
-        .formula { font-family: monospace; font-size: 1.1em; background: #ecf0f1; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 5px 0; }
-        .result-box { background: #d4edda; border-color: #c3e6cb; color: #155724; padding: 15px; border-radius: 6px; margin-top: 20px; }
-        
-        /* Media Queries - Responsividad */
-        @media (max-width: 1024px) {
-            .container {
-                max-width: 95%;
-                padding: 20px;
-            }
-            input[type="number"] {
-                width: 50px;
-            }
-            table {
-                font-size: 0.9rem;
-            }
-            th, td {
-                padding: 8px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .container {
-                max-width: 100%;
-                padding: 1.5rem;
-                border-radius: 8px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
-            h2 {
-                font-size: 1.15rem;
-            }
-            h3 {
-                font-size: 1rem;
-            }
-            .config-panel {
-                padding: 1rem;
-            }
-            .input-group {
-                flex-wrap: wrap;
-                gap: 0.6rem;
-                row-gap: 0.6rem;
-            }
-            label {
-                font-size: 0.9rem;
-            }
-            input[type="number"] {
-                width: 55px;
-                padding: 0.6rem 0.4rem;
-                min-height: 44px;
-            }
-            button {
-                padding: 0.65rem 1rem;
-                font-size: 0.9rem;
-                min-height: 44px;
-            }
-            table {
-                font-size: 0.75rem;
-            }
-            th, td {
-                padding: 0.5rem;
-            }
-            .step-box {
-                padding: 1rem;
-            }
-            .formula {
-                font-size: 0.9rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                padding: 0.5rem;
-            }
-            .container {
-                max-width: 100%;
-                padding: 1rem;
-                border-radius: 6px;
-            }
-            h1 {
-                font-size: 1.2rem;
-            }
-            h2 {
-                font-size: 1rem;
-            }
-            h3 {
-                font-size: 0.9rem;
-            }
-            .config-panel {
-                padding: 0.8rem;
-                border-radius: 4px;
-            }
-            .input-group {
-                flex-direction: row;
-                gap: 0.4rem;
-                flex-wrap: wrap;
-                row-gap: 0.8rem;
-            }
-            label {
-                font-size: 0.8rem;
-                min-width: 100%;
-                margin-right: 0;
-            }
-            input[type="number"] {
-                width: 100%;
-                padding: 0.7rem 0.8rem;
-                margin: 0;
-                font-size: 1rem;
-                min-height: 44px;
-            }
-            button {
-                width: 100%;
-                padding: 0.7rem 1rem;
-                font-size: 0.85rem;
-                min-height: 44px;
-            }
-            table {
-                font-size: 0.6rem;
-                overflow-x: auto;
-                width: 100%;
-                display: block;
-            }
-            th, td {
-                padding: 0.3rem;
-                font-size: 0.6rem;
-            }
-            .step-box {
-                padding: 0.8rem;
-                margin-bottom: 1rem;
-            }
-            .formula {
-                font-size: 0.75rem;
-            }
-            .result-box {
-                padding: 1rem;
-                font-size: 0.9rem;
-            }
-            .result-box ul {
-                padding-left: 1.2rem;
-            }
-            .result-box li {
-                font-size: 0.85rem;
-                margin-bottom: 0.5rem;
-            }
-        }
-        :root {
-            color-scheme: dark;
-            --bg-dark: #0b1220;
-            --surface-dark: #111827;
-            --panel-dark: #1f2937;
-            --text-dark: #e5e7eb;
-            --border-dark: #334155;
-            --accent-dark: #38bdf8;
-        }
-        body { background-color: var(--bg-dark); color: var(--text-dark); }
-        .container { background: var(--surface-dark); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); }
-        h1, h2, h3 { color: var(--text-dark); border-bottom-color: var(--border-dark); }
-        .config-panel, .step-box, .formula { background: var(--panel-dark); color: var(--text-dark); }
-        .step-box { border-left-color: var(--accent-dark); }
-        input[type="number"] { background: #0f172a; color: var(--text-dark); border-color: var(--border-dark); }
-        table { background: #0f172a; }
-        th, td { border-color: var(--border-dark); }
-        th { background-color: #1e293b; color: var(--text-dark); }
-        .result-box { background: #052e1c; color: #bbf7d0; border: 1px solid #166534; }
+
+        /* Mobile stepper */
         .mobile-stepper {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            background: #0f172a;
-            border: 1px solid var(--border-dark);
-            border-radius: 10px;
-            padding: 0.2rem;
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 0.2rem;
         }
         .mobile-stepper > input[type="number"] {
-            margin: 0;
-            border: none;
-            width: 64px;
-            min-width: 64px;
-            text-align: center;
+            margin: 0; border: none; background: transparent;
+            width: 64px; min-width: 64px; text-align: center; box-shadow: none;
         }
+        .mobile-stepper > input[type="number"]:focus { box-shadow: none; border: none; }
         .step-btn {
-            border: 0;
-            min-width: 38px;
-            min-height: 38px;
-            border-radius: 8px;
-            font-weight: 700;
-            color: #e2e8f0;
-            background: #1e293b;
-            touch-action: manipulation;
-            cursor: pointer;
+            border: none; min-width: 36px; min-height: 36px; border-radius: 8px;
+            font-weight: 700; font-size: 0.85rem; color: var(--text-2);
+            background: var(--surface-3); cursor: pointer; touch-action: manipulation;
+            transition: background 0.15s, color 0.15s;
         }
-        .step-btn:hover { background: #334155; }
+        .step-btn:hover { background: var(--border-strong); color: var(--text); transform: none; }
+
         @media (max-width: 768px) {
+            body { padding: 1.5rem 1rem; }
             .mobile-stepper { width: 100%; justify-content: space-between; }
             .mobile-stepper > input[type="number"] { flex: 1; width: auto; min-width: 0; }
+            table { font-size: 0.75rem; }
+            th, td { padding: 0.5rem 0.6rem; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 1rem 0.75rem; }
+            .card { padding: 1.1rem; border-radius: 12px; }
+            table { font-size: 0.65rem; }
+            th, td { padding: 0.35rem 0.45rem; }
         }
     </style>
 </head>
 <body>
+<div class="page">
+    <a href="index.html" class="nav-back">← Volver al Inicio</a>
+    <h1 class="page-title">Método Simplex</h1>
 
-<div class="container">
-    <div style="text-align: center; margin-bottom: 1rem;">
-        <a href="index.html" style="display: inline-block; background: rgba(79, 70, 229, 0.1); color: #4f46e5; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">← Volver al Inicio</a>
-    </div>
-    <h1>Resolución por Método Simplex</h1>
-    
-    <div class="config-panel">
-        <div class="input-group">
-            <label>Variables (X):</label> <input type="number" id="numVars" value="2" min="2" max="5">
-            <label>Restricciones (<=):</label> <input type="number" id="numRestr" value="3" min="1" max="5">
+    <div class="card">
+        <div class="card-title">Configuración</div>
+        <div class="input-row">
+            <span class="input-label">Variables (X):</span>
+            <input type="number" id="numVars" value="2" min="2" max="5">
+            <span class="input-label">Restricciones (≤):</span>
+            <input type="number" id="numRestr" value="3" min="1" max="5">
             <button onclick="generarFormulario()">Actualizar Matriz</button>
         </div>
         <div id="form-container"></div>
-        <button onclick="resolverSimplex()" style="margin-top: 15px; background-color: #28a745;">Resolver Paso a Paso</button>
+        <div style="margin-top: 1.25rem;">
+            <button class="btn-green" onclick="resolverSimplex()">Resolver Paso a Paso</button>
+        </div>
     </div>
 
     <div id="output"></div>
 </div>
 
 <script>
-    // Clase para manejar Fracciones exactas y evitar decimales/errores de redondeo
     class Frac {
         constructor(n, d = 1) {
             if (d === 0) throw new Error("División por cero");
             let sign = (n * d < 0) ? -1 : 1;
-            n = Math.abs(n);
-            d = Math.abs(d);
+            n = Math.abs(n); d = Math.abs(d);
             let gcd = this._gcd(n, d);
             this.n = sign * (n / gcd);
             this.d = d / gcd;
@@ -283,7 +240,6 @@
         static fromNum(num) { return new Frac(num, 1); }
     }
 
-    // Inicializar el formulario con el Problema Prototípico
     window.onload = () => {
         generarFormulario();
         cargarDatosPrototipicos();
@@ -313,27 +269,16 @@
         const inputs = root.querySelectorAll('input[type="number"]');
         inputs.forEach((input) => {
             if (input.dataset.stepper === 'on') return;
-            if (input.closest('.mobile-stepper')) {
-                input.dataset.stepper = 'on';
-                return;
-            }
+            if (input.closest('.mobile-stepper')) { input.dataset.stepper = 'on'; return; }
             const wrapper = document.createElement('div');
             wrapper.className = 'mobile-stepper';
             const minusBtn = document.createElement('button');
-            minusBtn.type = 'button';
-            minusBtn.className = 'step-btn';
-            minusBtn.textContent = '-1';
+            minusBtn.type = 'button'; minusBtn.className = 'step-btn'; minusBtn.textContent = '-1';
             const plusBtn = document.createElement('button');
-            plusBtn.type = 'button';
-            plusBtn.className = 'step-btn';
-            plusBtn.textContent = '+1';
-
+            plusBtn.type = 'button'; plusBtn.className = 'step-btn'; plusBtn.textContent = '+1';
             input.parentNode.insertBefore(wrapper, input);
-            wrapper.appendChild(minusBtn);
-            wrapper.appendChild(input);
-            wrapper.appendChild(plusBtn);
+            wrapper.appendChild(minusBtn); wrapper.appendChild(input); wrapper.appendChild(plusBtn);
             input.dataset.stepper = 'on';
-
             minusBtn.addEventListener('click', () => nudgeInput(input, -1));
             plusBtn.addEventListener('click', () => nudgeInput(input, 1));
         });
@@ -361,11 +306,11 @@
 
     function resolverSimplex() {
         const out = document.getElementById('output');
-        out.innerHTML = ''; 
-        
+        out.innerHTML = '';
+
         const v = parseInt(document.getElementById('numVars').value);
         const r = parseInt(document.getElementById('numRestr').value);
-        
+
         let c = []; for(let i=1; i<=v; i++) c.push(parseInt(document.getElementById(`obj_${i}`).value));
         let A = []; let b = [];
         for(let i=1; i<=r; i++) {
@@ -375,8 +320,7 @@
             b.push(parseInt(document.getElementById(`b_${i}`).value));
         }
 
-        // 1. Forma Original
-        let fOriginal = `<div class="step-box"><h2>Forma original del modelo</h2><div class="formula">Max Z = ${c.map((coef, i) => `${coef}X${i+1}`).join(' + ')}</div><br><strong>Sujeto a:</strong><br>`;
+        let fOriginal = `<div class="step-box"><h2>Forma original del modelo</h2><div class="formula">Max Z = ${c.map((coef, i) => `${coef}X${i+1}`).join(' + ')}</div><br><strong style="font-size:0.82rem;color:var(--text-2);">Sujeto a:</strong><br>`;
         for(let i=0; i<r; i++) {
             let terms = A[i].map((coef, j) => coef !== 0 ? `${coef}X${j+1}` : '').filter(t => t !== '').join(' + ');
             fOriginal += `<div class="formula">${terms || '0'} &le; ${b[i]}</div><br>`;
@@ -384,8 +328,7 @@
         fOriginal += `<div class="formula">X1 ... X${v} &ge; 0</div></div>`;
         out.innerHTML += fOriginal;
 
-        // 2. Forma Aumentada
-        let fAumentada = `<div class="step-box"><h2>Forma aumentada del modelo</h2><p>Se introducen ${r} variables de holgura (S) para convertir las desigualdades en igualdades equivalentes.</p>`;
+        let fAumentada = `<div class="step-box"><h2>Forma aumentada del modelo</h2><p style="font-size:0.82rem;color:var(--text-2);margin-bottom:0.75rem;">Se introducen ${r} variables de holgura (S) para convertir las desigualdades en igualdades equivalentes.</p>`;
         fAumentada += `<div class="formula">(0) Z ${c.map((coef, i) => coef !== 0 ? `- ${coef}X${i+1}` : '').join(' ')} = 0</div><br>`;
         for(let i=0; i<r; i++) {
             let terms = A[i].map((coef, j) => coef !== 0 ? `${coef}X${j+1}` : '').filter(t => t !== '').join(' + ');
@@ -394,29 +337,26 @@
         fAumentada += `</div>`;
         out.innerHTML += fAumentada;
 
-        // 3. Inicializar Matriz Simplex (Tableau)
         let totalVars = v + r;
         let varsName = [];
         for(let i=1; i<=v; i++) varsName.push(`X${i}`);
         for(let i=1; i<=r; i++) varsName.push(`S${i}`);
 
         let tableau = [];
-        let basicVars = []; // Guarda el index de la variable básica de cada fila
+        let basicVars = [];
 
-        // Fila Z (Indice 0)
-        let rowZ = [Frac.fromNum(1)]; // Z
+        let rowZ = [Frac.fromNum(1)];
         for(let i=0; i<v; i++) rowZ.push(Frac.fromNum(-c[i]));
         for(let i=0; i<r; i++) rowZ.push(Frac.fromNum(0));
-        rowZ.push(Frac.fromNum(0)); // RHS Z
+        rowZ.push(Frac.fromNum(0));
         tableau.push(rowZ);
         basicVars.push("Z");
 
-        // Filas Restricciones
         for(let i=0; i<r; i++) {
-            let row = [Frac.fromNum(0)]; // Z
-            for(let j=0; j<v; j++) row.push(Frac.fromNum(A[i][j])); // X
-            for(let j=0; j<r; j++) row.push(Frac.fromNum(i === j ? 1 : 0)); // S
-            row.push(Frac.fromNum(b[i])); // b
+            let row = [Frac.fromNum(0)];
+            for(let j=0; j<v; j++) row.push(Frac.fromNum(A[i][j]));
+            for(let j=0; j<r; j++) row.push(Frac.fromNum(i === j ? 1 : 0));
+            row.push(Frac.fromNum(b[i]));
             tableau.push(row);
             basicVars.push(`S${i+1}`);
         }
@@ -424,83 +364,66 @@
         let iteracion = 0;
         let optima = false;
 
-        while(!optima && iteracion < 10) { // Límite de seguridad
-            // Renderizar Tableau Actual
-            let htmlTable = `<h3>Iteración ${iteracion}</h3><table><tr><th>ϑ (b/ColPivot)</th><th>vb</th><th>Z</th>`;
-            varsName.forEach(name => htmlTable += `<th>${name}</th>`);
-            htmlTable += `<th>b</th></tr>`;
-
-            // Buscar Variable de Entrada (más negativa en fila Z)
+        while(!optima && iteracion < 10) {
+            // Buscar Variable de Entrada
             let pivotCol = -1;
             let minVal = 0;
             for(let j=1; j<=totalVars; j++) {
-                if(tableau[0][j].val() < minVal) {
-                    minVal = tableau[0][j].val();
-                    pivotCol = j;
-                }
+                if(tableau[0][j].val() < minVal) { minVal = tableau[0][j].val(); pivotCol = j; }
             }
+            if(pivotCol === -1) { optima = true; }
 
-            if(pivotCol === -1) {
-                optima = true; // No hay negativos, es óptima.
-            }
-
-            // Buscar Variable de Salida (Prueba de cociente mínimo ϑ)
+            // Buscar Variable de Salida
             let pivotRow = -1;
             let minRatio = Infinity;
             let ratios = new Array(r + 1).fill('');
-
             if(!optima) {
                 for(let i=1; i<=r; i++) {
                     let pVal = tableau[i][pivotCol].val();
                     if(pVal > 0) {
                         let ratio = tableau[i][tableau[i].length - 1].val() / pVal;
                         ratios[i] = new Frac(tableau[i][tableau[i].length - 1].val()).div(new Frac(pVal)).toString();
-                        if(ratio < minRatio) {
-                            minRatio = ratio;
-                            pivotRow = i;
-                        }
-                    } else {
-                        ratios[i] = '-';
-                    }
+                        if(ratio < minRatio) { minRatio = ratio; pivotRow = i; }
+                    } else { ratios[i] = '-'; }
                 }
             }
 
-            // Dibujar filas
+            // Renderizar Tableau (marcado pivot visual)
+            let htmlTable = `<h3 class="iter-title">Iteración ${iteracion}</h3><div class="table-wrap"><table><thead><tr><th>ϑ (b/Col)</th><th>Base</th><th>Z</th>`;
+            varsName.forEach((name, idx) => {
+                const isColPivot = pivotCol !== -1 && idx === pivotCol - 1;
+                htmlTable += `<th${isColPivot ? ' class="col-pivot"' : ''}>${name}</th>`;
+            });
+            htmlTable += `<th>b</th></tr></thead><tbody>`;
+
             for(let i=0; i<=r; i++) {
-                htmlTable += `<tr>`;
-                // Columna ϑ
+                const rowIsPivot = (pivotRow !== -1 && i === pivotRow);
+                htmlTable += `<tr${rowIsPivot ? ' class="row-pivot"' : ''}>`;
                 if (i === 0) htmlTable += `<td>-</td>`;
-                else htmlTable += `<td>${ratios[i]} ${i === pivotRow ? ' (Mín)' : ''}</td>`;
-                
-                // Columna vb
+                else htmlTable += `<td>${ratios[i]}${i === pivotRow ? ' (Mín)' : ''}</td>`;
                 htmlTable += `<td><strong>${basicVars[i]}</strong></td>`;
-                
-                // Valores
                 for(let j=0; j<tableau[i].length; j++) {
-                    let isPivot = (i === pivotRow && j === pivotCol);
-                    htmlTable += `<td class="${isPivot ? 'pivot' : ''}">${tableau[i][j].toString()}</td>`;
+                    const isCellPivot = rowIsPivot && j === pivotCol;
+                    const isColOnly   = !rowIsPivot && j === pivotCol && pivotCol !== -1;
+                    const cls = isCellPivot ? 'cell-pivot' : isColOnly ? 'col-pivot' : '';
+                    htmlTable += `<td${cls ? ` class="${cls}"` : ''}>${tableau[i][j].toString()}</td>`;
                 }
                 htmlTable += `</tr>`;
             }
-            htmlTable += `</table>`;
+            htmlTable += `</tbody></table></div>`;
             out.innerHTML += htmlTable;
 
             if(!optima) {
                 if(pivotRow === -1) {
-                    out.innerHTML += `<p style="color:red">Solución no acotada.</p>`;
+                    out.innerHTML += `<p style="color:var(--red);padding:0.75rem;font-size:0.85rem;">Solución no acotada.</p>`;
                     break;
                 }
-
-                // Hacer el Pivoteo
+                // Pivoteo (sin cambios en lógica)
                 let pivotElement = tableau[pivotRow][pivotCol];
-                basicVars[pivotRow] = varsName[pivotCol - 1]; // Actualizar VB
-
-                // Dividir fila pivote por el elemento pivote
+                basicVars[pivotRow] = varsName[pivotCol - 1];
                 for(let j=0; j<tableau[pivotRow].length; j++) {
                     tableau[pivotRow][j] = tableau[pivotRow][j].div(pivotElement);
                 }
-
-                // Hacer 0 el resto de la columna
                 for(let i=0; i<=r; i++) {
                     if(i !== pivotRow) {
                         let factor = tableau[i][pivotCol];
@@ -513,25 +436,18 @@
             }
         }
 
-        // 4. Interpretación
         let zMax = tableau[0][tableau[0].length - 1].toString();
-        let interp = `<div class="result-box"><h2>Interpretación de la respuesta</h2>`;
-        interp += `<p><strong>Solución Óptima Alcanzada en la Iteración ${iteracion}:</strong></p><ul>`;
+        let interp = `<div class="result-box"><h2>Solución Óptima — Iteración ${iteracion}</h2><ul>`;
         interp += `<li><strong>Beneficio Máximo (Z):</strong> ${zMax}</li>`;
-        
         for(let i=1; i<=v; i++) {
-            let varName = `X${i}`;
-            let val = "0";
-            let idx = basicVars.indexOf(varName);
+            let varName = `X${i}`, val = "0", idx = basicVars.indexOf(varName);
             if(idx !== -1) val = tableau[idx][tableau[idx].length - 1].toString();
             interp += `<li><strong>${varName} (Producto ${i}):</strong> Se fabrican ${val} lotes.</li>`;
         }
         for(let i=1; i<=r; i++) {
-            let varName = `S${i}`;
-            let val = "0";
-            let idx = basicVars.indexOf(varName);
+            let varName = `S${i}`, val = "0", idx = basicVars.indexOf(varName);
             if(idx !== -1) val = tableau[idx][tableau[idx].length - 1].toString();
-            interp += `<li><strong>${varName} (Holgura R${i}):</strong> Queda un remanente de ${val}.</li>`;
+            interp += `<li><strong>${varName} (Holgura R${i}):</strong> Remanente de ${val}.</li>`;
         }
         interp += `</ul></div>`;
         out.innerHTML += interp;
