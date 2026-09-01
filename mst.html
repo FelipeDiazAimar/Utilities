@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árbol de Mínima Expansión (MST)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        :root{--bg:#000;--surface:#1c1c1e;--surface-2:#252528;--surface-3:#3a3a3c;--border:rgba(255,255,255,.08);--border-strong:rgba(255,255,255,.16);--border-hover:rgba(255,255,255,.22);--text:rgba(255,255,255,.92);--text-2:rgba(255,255,255,.52);--text-3:rgba(255,255,255,.28);--accent:#0a84ff;--accent-hover:#409cff;--green:#30d158;--green-hover:#28b84c;--red:#ff453a;--red-hover:#d93025;--yellow:#ffd60a;--graph-bg:#141414;--highlight-bg:rgba(10,132,255,.06);--highlight-border:rgba(10,132,255,.25);--warning-bg:rgba(255,214,10,.08);--warning-border:rgba(255,214,10,.25);--table-header:#1c1c1e}
+        [data-theme="light"]{--bg:#f4f4f9;--surface:#fff;--surface-2:#f0f0f3;--surface-3:#e2e2e5;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.14);--border-hover:rgba(0,0,0,.22);--text:#1c1c1e;--text-2:rgba(0,0,0,.52);--text-3:rgba(0,0,0,.28);--accent:#0a84ff;--accent-hover:#006ed4;--green:#34c759;--green-hover:#28a745;--red:#ff3b30;--red-hover:#d32f2f;--yellow:#ff9f0a;--graph-bg:#fafafa;--highlight-bg:#f0f8ff;--highlight-border:#0a84ff;--warning-bg:#fff3cd;--warning-border:#ffeeba;--table-header:#f0f0f3}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1.5rem;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+        .page{width:100%;max-width:1300px;margin:0 auto}
+        .nav-back{display:inline-flex;align-items:center;gap:.4rem;color:var(--accent);font-size:.82rem;font-weight:500;text-decoration:none;padding:.4rem .85rem;border-radius:999px;background:rgba(10,132,255,.1);border:1px solid rgba(10,132,255,.18);transition:background .18s;margin-bottom:1.25rem}
+        .nav-back:hover{background:rgba(10,132,255,.18)}
+        .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+        h1{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;color:var(--text);line-height:1.2}
+        h2{font-size:1rem;font-weight:600;color:var(--text);letter-spacing:-.01em;margin-bottom:.75rem}
+        h3{font-size:.92rem;font-weight:600;color:var(--text);text-align:center}
+        .panel{background:var(--surface);padding:1.25rem;border-radius:14px;border:1px solid var(--border);transition:background .3s,border-color .3s}
+        .global-config{background:var(--highlight-bg);border:1px solid var(--highlight-border);margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:1rem 1.25rem;border-radius:14px}
+        .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+        button{font-family:'Inter',sans-serif;background-color:var(--accent);color:#fff;border:none;padding:.55rem 1rem;cursor:pointer;border-radius:8px;font-size:.78rem;font-weight:600;transition:background .18s,transform .12s;letter-spacing:-.01em}
+        button:hover{background-color:var(--accent-hover);transform:translateY(-1px)}
+        button:active{transform:translateY(1px)}
+        button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+        button.danger{background-color:var(--red)}button.danger:hover{background-color:var(--red-hover)}
+        button.success{background-color:var(--green)}button.success:hover{background-color:var(--green-hover)}
+        button.purple{background-color:#8b5cf6}button.purple:hover{background-color:#7c3aed}
+        .input-section{background:var(--surface-2);padding:1.1rem;border-radius:10px;margin-bottom:1rem;border:1px solid var(--border)}
+        .form-group{display:flex;flex-direction:column;gap:5px}
+        label{font-size:.78rem;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
+        input,select{font-family:'Inter',sans-serif;padding:.55rem .7rem;border:1px solid var(--border-strong);border-radius:8px;font-size:.82rem;background-color:var(--surface);color:var(--text);transition:border-color .2s}
+        input:focus,select:focus{outline:none;border-color:var(--accent)}
+        .table-container{overflow-x:auto;border-radius:10px;border:1px solid var(--border);background:var(--surface)}
+        table{width:100%;border-collapse:collapse}
+        th,td{border-bottom:1px solid var(--border);padding:.65rem .75rem;text-align:center;font-size:.82rem}
+        th{background-color:var(--table-header);font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em;font-size:.72rem}
+        td button.danger{padding:4px 10px;font-size:.72rem;border-radius:6px}
+        #graph-container{width:100%;height:600px;border:1px solid var(--border);border-radius:12px;background-color:var(--graph-bg);margin-bottom:1rem}
+        .solver-section{display:none;margin-top:0;padding:1.25rem;border:1px solid var(--highlight-border);background-color:var(--highlight-bg);border-radius:14px}
+        .step-controls{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:1rem;padding:.8rem 1rem;background:var(--surface);border-radius:10px;border:1px solid var(--border)}
+        #step-info{font-size:.82rem;font-weight:600;color:var(--text-2)}
+        #step-description{background:var(--surface);padding:1.25rem;border:1px solid var(--border);border-radius:10px;min-height:100px;line-height:1.7;font-size:.88rem}
+        #step-description table{margin:.75rem 0}#step-description th,#step-description td{padding:.5rem .65rem}#step-description strong{color:var(--accent)}
+        .hidden{display:none!important}
+        .theme-toggle{background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);display:flex;align-items:center;gap:6px;border-radius:10px;padding:.45rem .8rem;font-size:.82rem}
+        .theme-toggle:hover{background:var(--surface-3)}
+        .vis-network .vis-manipulation .vis-close{width:20px!important;height:20px!important;background-size:contain!important;position:absolute!important;right:15px!important;top:50%!important;transform:translateY(-50%)!important;opacity:.6}
+        .vis-network .vis-manipulation .vis-close:hover{opacity:1}
+        .vis-network .vis-manipulation{background:var(--surface)!important;border-bottom:1px solid var(--border)!important}
+        .vis-network .vis-manipulation .vis-button .vis-label{color:var(--text)!important;font-weight:600;font-family:'Inter',sans-serif!important;font-size:12px!important}
+        #main-flex.full-log-mode{flex-direction:column}
+        #main-flex.full-log-mode>div:last-child{order:-1;width:100%}
+        #main-flex.full-log-mode>div.solver-section{width:100%}
+        @media(max-width:900px){#main-flex{flex-direction:column!important}#graph-container{height:400px}}
+        @media(max-width:480px){body{padding:1rem .75rem}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a href="index.html" class="nav-back">← Volver al Hub</a>
+    <div class="top-bar">
+        <h1>🌳 Árbol de Mínima Expansión</h1>
+        <button id="btn-theme" class="theme-toggle">☀︎ Modo Claro</button>
+    </div>
+    <div id="global-config" class="panel global-config">
+        <div style="display:flex;gap:12px;align-items:center">
+            <label style="text-transform:none;color:var(--text);font-size:.85rem">Algoritmo de Prim — paso a paso</label>
+        </div>
+        <div class="controls">
+            <button id="btn-example">Cargar Ejemplo</button>
+            <button id="btn-save" class="purple">💾 Guardar</button>
+            <button id="btn-load" class="purple">📂 Cargar</button>
+            <input type="file" id="file-load" accept=".json" style="display:none">
+            <button id="btn-clear" class="danger">Limpiar Todo</button>
+        </div>
+    </div>
+    <div id="main-flex" style="display:flex;gap:20px;align-items:flex-start">
+        <div id="data-entry-panel" style="flex:1;min-width:0">
+            <h2>Ingreso de Datos</h2>
+            <div class="input-section">
+                <div style="display:flex;gap:10px;margin-bottom:10px">
+                    <div class="form-group" style="flex:1"><label>Nodo A:</label><input type="text" id="edge-from" placeholder="Ej: 1"></div>
+                    <div class="form-group" style="flex:1"><label>Nodo B:</label><input type="text" id="edge-to" placeholder="Ej: 2"></div>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:10px">
+                    <div class="form-group" style="flex:1"><label>Valor / Costo:</label><input type="number" step="any" id="edge-value" placeholder="Ej: 10"></div>
+                </div>
+                <div style="text-align:right"><button id="btn-add-edge" class="success">Agregar Arco</button></div>
+            </div>
+            <div class="table-container">
+                <table id="data-table"><thead><tr><th>Nodo A</th><th>Nodo B</th><th>Valor</th><th>Acción</th></tr></thead><tbody></tbody></table>
+            </div>
+            <div class="panel" style="margin-top:16px">
+                <button id="btn-solve" class="success" style="width:100%;font-size:.92rem;padding:.75rem">¡Resolver!</button>
+            </div>
+            <div id="edge-curve-panel" class="panel hidden" style="margin-top:12px;text-align:center;background:var(--highlight-bg);border:1px dashed var(--highlight-border)">
+                <label style="display:block;margin-bottom:5px;text-transform:none;color:var(--text);font-size:.82rem"><strong>Curvatura del Arco:</strong></label>
+                <input type="range" id="edge-curve-slider" min="-1" max="1" step="0.1" value="0" style="width:100%;accent-color:var(--accent)">
+            </div>
+        </div>
+        <div id="solver-panel" class="panel solver-section" style="flex:1;min-width:0">
+            <button id="btn-back-edit" style="margin-bottom:12px">← Volver a Editar</button>
+            <h3>Paso a Paso</h3>
+            <div class="step-controls"><button id="btn-prev-step" disabled>Anterior</button><strong id="step-info">Paso 0 / 0</strong><button id="btn-next-step">Siguiente</button></div>
+            <button id="btn-full-log" class="success" style="width:100%;margin-bottom:12px">Ver Toda la Solución Juntas 📄</button>
+            <div id="step-description"></div>
+        </div>
+        <div style="flex:1;min-width:0">
+            <h2>Visualización del Grafo</h2>
+            <div id="graph-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+// ═══ MST SOLVER ═══
+class MSTSolver {
+    constructor(nodes, edges) { this.nodes = nodes; this.edges = edges; this.steps = []; }
+    solve() {
+        if (this.nodes.length === 0) return [];
+        this.steps = [];
+        let C = new Set(), C_prime = new Set(this.nodes), treeEdges = [], totalCost = 0;
+        let i = this.nodes[0]; C.add(i); C_prime.delete(i);
+        let iter = 1;
+        let stepText = `**Paso 1:** Comenzamos en el nodo ${i}. C={${[...C].join(',')}}, C'={${[...C_prime].join(',')}}\n`;
+        let minEdge = this._getMinEdge(C, C_prime);
+        if (minEdge) {
+            let j = minEdge.from === i ? minEdge.to : minEdge.from;
+            C.add(j); C_prime.delete(j); treeEdges.push(minEdge); totalCost += minEdge.value;
+            stepText += `Unimos ${i} con el nodo más cercano ${j}. El arco (${minEdge.from},${minEdge.to}) estará en el MST.\nC={${[...C].join(',')}}, C'={${[...C_prime].join(',')}}`;
+            let s = { iteration: iter, selectedNodes: [...C], edgesInTree: [...treeEdges], currentEdge: minEdge, totalCost, description: stepText };
+            this.steps.push(s); s.tableHTML = this._genTable(this.steps);
+        } else return this.steps;
+        while (C_prime.size > 0) {
+            iter++;
+            let nextEdge = this._getMinEdge(C, C_prime);
+            if (!nextEdge) break;
+            let n = C.has(nextEdge.from) ? nextEdge.to : nextEdge.from;
+            let m = C.has(nextEdge.from) ? nextEdge.from : nextEdge.to;
+            C.add(n); C_prime.delete(n); treeEdges.push(nextEdge); totalCost += nextEdge.value;
+            let desc = `**Paso 2 (${iter-1}):** De C' elijo el ${n} (n). El nodo en C más cercano es ${m} (m).\n(m,n)=(${nextEdge.from},${nextEdge.to}), C={${[...C].join(',')}} C'={${[...C_prime].join(',')}}\n**Paso 3:** Repetir.`;
+            let s = { iteration: iter, selectedNodes: [...C], edgesInTree: [...treeEdges], currentEdge: nextEdge, totalCost, description: desc };
+            this.steps.push(s); s.tableHTML = this._genTable(this.steps);
+        }
+        let fd = `**Conclusión:** el árbol de expansión mínima consta de los arcos: ${treeEdges.map(e=>`(${e.from},${e.to})`).join(', ')}.\nLa longitud del árbol de expansión mínima es de: ${treeEdges.map(e=>e.value).join(' + ')} = **${totalCost}**.\n`;
+        if (C_prime.size > 0) fd += `\n**ADVERTENCIA:** Grafo desconectado. Nodos inalcanzables: ${[...C_prime].join(',')}`;
+        this.steps.push({ iteration: iter+1, selectedNodes: [...C], edgesInTree: [...treeEdges], currentEdge: null, totalCost, description: fd, tableHTML: "" });
+        return this.steps;
+    }
+    _getMinEdge(C, Cp) {
+        let min = Infinity, best = null;
+        for (let e of this.edges) {
+            if ((C.has(e.from) && Cp.has(e.to)) || (C.has(e.to) && Cp.has(e.from))) {
+                if (e.value < min) { min = e.value; best = e; }
+            }
+        } return best;
+    }
+    _genTable(steps) {
+        let ir = `<tr><th>Iteración</th><th>Inicio</th>`, nr = `<tr><td><b>Nodo</b></td><td>${steps[0].selectedNodes[0]}</td>`;
+        for (let i = 0; i < steps.length; i++) { ir += `<th>${i+1}</th>`; let ns = steps[i].selectedNodes; nr += `<td>${ns[ns.length-1]}</td>`; }
+        ir += `</tr>`; nr += `</tr>`;
+        let bt = `<table><tr><th>Arco elegido</th><th>Valor acumulado</th><th>Arcos del árbol</th></tr><tr><td>-</td><td>-</td><td>-</td></tr>`;
+        for (let i = 0; i < steps.length; i++) { let e = steps[i].currentEdge; bt += `<tr><td>(${e.from},${e.to})</td><td>${steps[i].totalCost}</td><td>${i+1}</td></tr>`; }
+        return `<table>${ir}${nr}</table><br>${bt}</table>`;
+    }
+}
+
+// ═══ APP ═══
+let graphNodes = new vis.DataSet([]);
+let graphEdges = new vis.DataSet([]);
+let network = null, isDarkTheme = true, solverSteps = [], currentStepIndex = 0, initialEdgesState = [], isFullLogMode = false;
+
+function gNC() { return { background: isDarkTheme ? '#2d2d2d' : '#f8f9fa', border: isDarkTheme ? '#3b82f6' : '#3498db' }; }
+function gEC() { return { color: isDarkTheme ? '#9ca3af' : '#7f8c8d' }; }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initGraph(); setupEvents();
+});
+
+function initGraph() {
+    const container = document.getElementById('graph-container');
+    network = new vis.Network(container, { nodes: graphNodes, edges: graphEdges }, {
+        nodes: { shape: 'circle', color: gNC(), font: { color: isDarkTheme?'#e0e0e0':'#333', strokeWidth: 0 }, borderWidth: 2 },
+        edges: { color: gEC(), font: { align:'top', color: isDarkTheme?'#e0e0e0':'#333', strokeWidth:0, vadjust:-5 }, width:2, smooth:{enabled:false}, arrows:{to:{enabled:false}} },
+        physics: { enabled: false }, interaction: { hover: true },
+        manipulation: {
+            enabled: true,
+            addNode(nd, cb) { let id = prompt("ID del nodo:"); if(id){if(graphNodes.get(id)){alert("Ya existe.");cb(null);return;}if(id.startsWith('lbl_')){alert("ID reservado.");cb(null);return;}nd.id=id;nd.label=id;cb(nd);}else cb(null); },
+            addEdge(ed, cb) {
+                if(ed.from===ed.to){alert("No bucles.");cb(null);return;}
+                if(graphEdges.get().find(e=>(e.from===ed.from&&e.to===ed.to)||(e.from===ed.to&&e.to===ed.from))){alert("Ya existe.");cb(null);return;}
+                let v=prompt("Valor/costo del arco:"); let pv=parseFloat(v); if(isNaN(pv)||pv<0){alert("Inválido.");cb(null);return;}
+                ed.id=`${ed.from}-${ed.to}`;ed.valueProp=pv;ed.valueRev=pv;ed.label="";ed.arrows="";cb(ed);addGhostLabel(ed);renderTable();
+            },
+            deleteNode(d,cb){cb(d);renderTable();},deleteEdge(d,cb){cb(d);renderTable();},editEdge:false
+        }
+    });
+    let selEdge=null;
+    network.on("selectEdge",p=>{if(p.edges.length===1&&p.nodes.length===0){selEdge=p.edges[0];document.getElementById('edge-curve-panel').classList.remove('hidden');let e=graphEdges.get(selEdge),s=document.getElementById('edge-curve-slider');s.value=e.smooth&&e.smooth.enabled?(e.smooth.type==='curvedCCW'?-e.smooth.roundness:e.smooth.roundness):0;}});
+    network.on("deselectEdge",p=>{if(p.edges.length===0){selEdge=null;document.getElementById('edge-curve-panel').classList.add('hidden');}});
+    document.getElementById('edge-curve-slider').addEventListener('input',e=>{if(selEdge){let v=parseFloat(e.target.value);if(v===0)graphEdges.update({id:selEdge,smooth:{enabled:false}});else graphEdges.update({id:selEdge,smooth:{enabled:true,type:v>0?'curvedCW':'curvedCCW',roundness:Math.abs(v)}});}});
+    network.on("dragging",p=>{if(p.nodes.length>0){let dn=p.nodes.filter(n=>!n.startsWith('lbl_'));if(dn.length>0)reposLabels(dn,network.getPositions());}});
+    network.on("dragEnd",p=>{if(p.nodes.length>0){let nid=p.nodes[0];if(nid.startsWith('lbl_')){let pts=nid.split('_'),fr=pts[1],to=pts[2];let pF=network.getPositions([fr])[fr],pT=network.getPositions([to])[to];if(!pF||!pT)return;let fx=pF.x,fy=pF.y,tx=pT.x,ty=pT.y,dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy)||1,nx=dx/len,ny=dy/len,px=-ny*20,py=nx*20;let dX=(fx+tx)/2+px,dY=(fy+ty)/2+py;let lp=network.getPositions([nid])[nid];graphNodes.update({id:nid,customDeltaX:lp.x-dX,customDeltaY:lp.y-dY,x:lp.x,y:lp.y});}else{let dn=p.nodes.filter(n=>!n.startsWith('lbl_'));reposLabels(dn,network.getPositions());}}});
+    graphEdges.on('remove',(ev,pr)=>{renderTable();if(pr.items)pr.items.forEach(id=>{let[f,t]=id.split('-');let l=`lbl_${f}_${t}_mst`;if(graphNodes.get(l))graphNodes.remove(l);});});
+}
+
+function addGhostLabel(e) {
+    let nF=graphNodes.get(e.from),nT=graphNodes.get(e.to);if(!nF||!nT)return;
+    let fx=nF.x||0,fy=nF.y||0,tx=nT.x||0,ty=nT.y||0,dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy)||1,nx=dx/len,ny=dy/len,px=-ny*20,py=nx*20;
+    graphNodes.add({id:`lbl_${e.from}_${e.to}_mst`,label:e.valueProp.toString(),shape:'text',font:{size:16,bold:true,color:isDarkTheme?'#e0e0e0':'#333',strokeWidth:0},x:(fx+tx)/2+px,y:(fy+ty)/2+py,isGhostLabel:true,originalText:e.valueProp.toString()});
+}
+function reposLabels(dns, pos) {
+    let ups=[];
+    graphEdges.get().filter(e=>dns.includes(e.from)||dns.includes(e.to)).forEach(e=>{
+        let pF=pos[e.from],pT=pos[e.to];if(!pF||!pT)return;
+        let fx=pF.x,fy=pF.y,tx=pT.x,ty=pT.y,dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy)||1,nx=dx/len,ny=dy/len,px=-ny*20,py=nx*20;
+        let l=graphNodes.get(`lbl_${e.from}_${e.to}_mst`);
+        if(l)ups.push({id:l.id,x:(fx+tx)/2+px+(l.customDeltaX||0),y:(fy+ty)/2+py+(l.customDeltaY||0)});
+    });
+    if(ups.length>0)graphNodes.update(ups);
+}
+
+function setupEvents() {
+    document.getElementById('btn-add-edge').addEventListener('click', addEdgeFromForm);
+    document.getElementById('btn-clear').addEventListener('click', clearAll);
+    document.getElementById('btn-example').addEventListener('click', loadExample);
+    document.getElementById('btn-save').addEventListener('click', () => {
+        let d={mode:'mst',nodes:graphNodes.get(),edges:graphEdges.get()};
+        let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`mst_${Date.now()}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+    });
+    document.getElementById('btn-load').addEventListener('click',()=>document.getElementById('file-load').click());
+    document.getElementById('file-load').addEventListener('change',e=>{
+        let f=e.target.files[0];if(!f)return;let r=new FileReader();
+        r.onload=ev=>{try{let d=JSON.parse(ev.target.result);clearAll();if(d.nodes)graphNodes.add(d.nodes);if(d.edges)graphEdges.add(d.edges);renderTable();}catch(err){alert("Error al cargar.");}document.getElementById('file-load').value='';};
+        r.readAsText(f);
+    });
+    document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+    document.getElementById('btn-solve').addEventListener('click', solveProblem);
+    document.getElementById('btn-back-edit').addEventListener('click', backToEdit);
+    document.getElementById('btn-prev-step').addEventListener('click', ()=>changeStep(-1));
+    document.getElementById('btn-next-step').addEventListener('click', ()=>changeStep(1));
+    setupFullLog();
+}
+
+function addEdgeFromForm() {
+    let from=document.getElementById('edge-from').value.trim(), to=document.getElementById('edge-to').value.trim(), val=parseFloat(document.getElementById('edge-value').value);
+    if(!from||!to||isNaN(val)){alert('Complete todos los campos.');return;}
+    if(from===to){alert('No bucles.');return;}
+    if(!graphNodes.get(from))graphNodes.add({id:from,label:from,x:Math.random()*200,y:Math.random()*200});
+    if(!graphNodes.get(to))graphNodes.add({id:to,label:to,x:Math.random()*200,y:Math.random()*200});
+    if(graphEdges.get().find(e=>(e.from===from&&e.to===to)||(e.from===to&&e.to===from))){alert('Ya existe.');return;}
+    let e={id:`${from}-${to}`,from,to,valueProp:val,valueRev:val,label:'',arrows:''};
+    graphEdges.add(e);addGhostLabel(e);
+    document.getElementById('edge-from').value='';document.getElementById('edge-to').value='';document.getElementById('edge-value').value='';
+}
+
+function updateEdgeValue(id) {
+    let el=document.getElementById(`edit-val-${id}`),v=parseFloat(el.value);
+    if(!isNaN(v)&&v>=0){graphEdges.update({id,valueProp:v,valueRev:v});let e=graphEdges.get(id);graphNodes.update({id:`lbl_${e.from}_${e.to}_mst`,label:v.toString(),originalText:v.toString()});}
+}
+function removeEdge(id){graphEdges.remove(id);}
+function renderTable(){
+    let tb=document.querySelector('#data-table tbody');tb.innerHTML='';
+    graphEdges.get().forEach(e=>{let tr=document.createElement('tr');tr.innerHTML=`<td>${e.from}</td><td>${e.to}</td><td><input type="number" step="any" id="edit-val-${e.id}" value="${e.valueProp}" style="width:60px;padding:2px" onchange="updateEdgeValue('${e.id}')"></td><td><button class="danger" onclick="removeEdge('${e.id}')">✕</button></td>`;tb.appendChild(tr);});
+}
+function clearAll(){graphNodes.clear();graphEdges.clear();document.getElementById('solver-panel').style.display='none';document.getElementById('data-entry-panel').style.display='block';document.getElementById('edge-curve-panel').classList.add('hidden');}
+
+function solveProblem() {
+    let nodes=graphNodes.get().filter(n=>!n.isGhostLabel).map(n=>n.id),edges=graphEdges.get();
+    if(nodes.length===0){alert("Grafo vacío.");return;}
+    initialEdgesState=edges.map(e=>({...e}));
+    let edgesRaw=edges.map(e=>({from:e.from,to:e.to,value:e.valueProp,id:e.id}));
+    solverSteps=new MSTSolver(nodes,edgesRaw).solve();
+    if(solverSteps.length===0){alert("Sin solución.");return;}
+    currentStepIndex=0;
+    document.getElementById('data-entry-panel').style.display='none';document.getElementById('solver-panel').style.display='block';document.getElementById('edge-curve-panel').classList.add('hidden');
+    renderStep();
+}
+function changeStep(d){currentStepIndex+=d;if(currentStepIndex<0)currentStepIndex=0;if(currentStepIndex>=solverSteps.length)currentStepIndex=solverSteps.length-1;renderStep();}
+function renderStep(){
+    let s=solverSteps[currentStepIndex];
+    document.getElementById('btn-prev-step').disabled=currentStepIndex===0;document.getElementById('btn-next-step').disabled=currentStepIndex===solverSteps.length-1;
+    document.getElementById('step-info').innerText=`Paso ${currentStepIndex+1} de ${solverSteps.length}`;
+    let h=s.description;if(s.tableHTML)h+="\n<br>"+s.tableHTML;
+    document.getElementById('step-description').innerHTML=h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    updateGraphVisuals(s);
+}
+function updateGraphVisuals(step) {
+    // Reset nodes
+    graphNodes.getIds().forEach(id=>{let n=graphNodes.get(id);if(!n.isGhostLabel)graphNodes.update({id,label:id,color:gNC()});});
+    // Reset edges
+    graphEdges.update(initialEdgesState.map(e=>({id:e.id,color:gEC(),width:2,label:""})));
+    // Highlight selected nodes
+    (step.selectedNodes||[]).forEach(id=>{if(!id.startsWith('lbl_'))graphNodes.update({id,color:{background:isDarkTheme?'#065f46':'#2ecc71',border:'#27ae60'}});});
+    // Highlight tree edges
+    (step.edgesInTree||[]).forEach(eo=>{let e1=`${eo.from}-${eo.to}`,e2=`${eo.to}-${eo.from}`,id=graphEdges.get(e1)?e1:e2;if(id)graphEdges.update({id,color:{color:'#27ae60'},width:4});});
+    // Highlight current edge
+    if(step.currentEdge){let e=step.currentEdge,e1=`${e.from}-${e.to}`,e2=`${e.to}-${e.from}`,id=graphEdges.get(e1)?e1:e2;if(id)graphEdges.update({id,color:{color:'#f1c40f'},width:4});}
+}
+function backToEdit(){
+    document.getElementById('solver-panel').style.display='none';document.getElementById('data-entry-panel').style.display='block';document.getElementById('main-flex').classList.remove('full-log-mode');isFullLogMode=false;
+    document.getElementById('btn-full-log').innerHTML='Ver Toda la Solución Juntas 📄';document.getElementById('btn-prev-step').style.display='inline-block';document.getElementById('btn-next-step').style.display='inline-block';
+    if(initialEdgesState.length>0){graphEdges.update(initialEdgesState.map(e=>({id:e.id,color:gEC(),width:2,label:""})));graphNodes.getIds().forEach(id=>{let n=graphNodes.get(id);if(!n.isGhostLabel)graphNodes.update({id,color:gNC()});else graphNodes.update({id,label:n.originalText,font:{color:isDarkTheme?'#e0e0e0':'#333'}});});}
+}
+function setupFullLog(){
+    let btn=document.getElementById('btn-full-log');
+    btn.addEventListener('click',()=>{
+        isFullLogMode=!isFullLogMode;
+        if(isFullLogMode){document.getElementById('main-flex').classList.add('full-log-mode');btn.innerHTML='Volver al Paso a Paso 🔄';let h="";solverSteps.forEach((s,i)=>{h+=`<h4 style="margin-top:15px;margin-bottom:10px;color:var(--accent)">Paso ${i+1}</h4>`;let sh=s.description;if(s.tableHTML)sh+="<br>"+s.tableHTML;h+=sh.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');h+="<hr style='margin-top:15px;border:0;border-top:1px solid var(--border)'>";});document.getElementById('step-description').innerHTML=h;document.getElementById('btn-prev-step').style.display='none';document.getElementById('btn-next-step').style.display='none';document.getElementById('step-info').innerText='Solución Completa';currentStepIndex=solverSteps.length-1;updateGraphVisuals(solverSteps[currentStepIndex]);}
+        else{document.getElementById('main-flex').classList.remove('full-log-mode');btn.innerHTML='Ver Toda la Solución Juntas 📄';document.getElementById('btn-prev-step').style.display='inline-block';document.getElementById('btn-next-step').style.display='inline-block';currentStepIndex=0;renderStep();}
+    });
+}
+function toggleTheme(){
+    isDarkTheme=!isDarkTheme;let btn=document.getElementById('btn-theme');
+    if(isDarkTheme){document.documentElement.removeAttribute('data-theme');btn.innerHTML='☀︎ Modo Claro';}else{document.documentElement.setAttribute('data-theme','light');btn.innerHTML='🌙 Modo Oscuro';}
+    if(network){network.setOptions({nodes:{font:{color:isDarkTheme?'#e0e0e0':'#333',strokeWidth:0}},edges:{font:{color:isDarkTheme?'#e0e0e0':'#333',strokeWidth:0}}});graphNodes.getIds().forEach(id=>{let n=graphNodes.get(id);if(n.isGhostLabel)graphNodes.update({id,font:{color:isDarkTheme?'#e0e0e0':'#333',strokeWidth:0}});else graphNodes.update({id,color:gNC()});});if(document.getElementById('solver-panel').style.display==='none')graphEdges.update(graphEdges.getIds().map(id=>({id,color:gEC()})));}
+}
+function loadExample(){
+    clearAll();
+    let coords={'1':{x:-200,y:0},'2':{x:0,y:-100},'3':{x:0,y:100},'4':{x:200,y:-100},'5':{x:200,y:100}};
+    ['1','2','3','4','5'].forEach(id=>graphNodes.add({id,label:id,x:coords[id].x,y:coords[id].y}));
+    [{f:'1',t:'2',v:1},{f:'1',t:'4',v:5},{f:'2',t:'4',v:5},{f:'2',t:'3',v:7},{f:'2',t:'5',v:2},{f:'3',t:'5',v:2},{f:'4',t:'5',v:4}].forEach(e=>{
+        let ed={id:`${e.f}-${e.t}`,from:e.f,to:e.t,valueProp:e.v,valueRev:e.v,label:'',arrows:''};graphEdges.add(ed);addGhostLabel(ed);
+    });
+    renderTable();
+}
+</script>
+</body>
+</html>
