@@ -8,8 +8,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <style>
-        :root{--bg:#000;--surface:#1c1c1e;--surface-2:#252528;--surface-3:#3a3a3c;--border:rgba(255,255,255,.08);--border-strong:rgba(255,255,255,.16);--border-hover:rgba(255,255,255,.22);--text:rgba(255,255,255,.92);--text-2:rgba(255,255,255,.52);--text-3:rgba(255,255,255,.28);--accent:#0a84ff;--accent-hover:#409cff;--green:#30d158;--green-hover:#28b84c;--red:#ff453a;--red-hover:#d93025;--yellow:#ffd60a;--graph-bg:#141414;--highlight-bg:rgba(10,132,255,.06);--highlight-border:rgba(10,132,255,.25);--warning-bg:rgba(255,214,10,.08);--warning-border:rgba(255,214,10,.25);--table-header:#1c1c1e}
-        [data-theme="light"]{--bg:#f4f4f9;--surface:#fff;--surface-2:#f0f0f3;--surface-3:#e2e2e5;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.14);--border-hover:rgba(0,0,0,.22);--text:#1c1c1e;--text-2:rgba(0,0,0,.52);--text-3:rgba(0,0,0,.28);--accent:#0a84ff;--accent-hover:#006ed4;--green:#34c759;--green-hover:#28a745;--red:#ff3b30;--red-hover:#d32f2f;--yellow:#ff9f0a;--graph-bg:#fafafa;--highlight-bg:#f0f8ff;--highlight-border:#0a84ff;--warning-bg:#fff3cd;--warning-border:#ffeeba;--table-header:#f0f0f3}
+        :root{
+            --bg:#000;
+            --surface:#1c1c1e;
+            --surface-2:#252528;
+            --surface-3:#3a3a3c;
+            --border:rgba(255,255,255,.08);
+            --border-strong:rgba(255,255,255,.16);
+            --border-hover:rgba(255,255,255,.22);
+            --text:rgba(255,255,255,.92);
+            --text-2:rgba(255,255,255,.52);
+            --text-3:rgba(255,255,255,.28);
+            --accent:#0a84ff;
+            --accent-hover:#409cff;
+            --green:#30d158;
+            --green-hover:#28b84c;
+            --red:#ff453a;
+            --red-hover:#d93025;
+            --yellow:#ffd60a;
+            --graph-bg:#141414;
+            --highlight-bg:rgba(10,132,255,.06);
+            --highlight-border:rgba(10,132,255,.25);
+            --warning-bg:rgba(255,214,10,.08);
+            --warning-border:rgba(255,214,10,.25);
+            --table-header-bg:#1e3a8a;
+            --table-header-text:#dbeafe;
+        }
+        [data-theme="light"]{
+            --bg:#f4f4f9;
+            --surface:#fff;
+            --surface-2:#f0f0f3;
+            --surface-3:#e2e2e5;
+            --border:rgba(0,0,0,.08);
+            --border-strong:rgba(0,0,0,.14);
+            --border-hover:rgba(0,0,0,.22);
+            --text:#1c1c1e;
+            --text-2:rgba(0,0,0,.52);
+            --text-3:rgba(0,0,0,.28);
+            --accent:#0a84ff;
+            --accent-hover:#006ed4;
+            --green:#34c759;
+            --green-hover:#28a745;
+            --red:#ff3b30;
+            --red-hover:#d32f2f;
+            --yellow:#ff9f0a;
+            --graph-bg:#fafafa;
+            --highlight-bg:#f0f8ff;
+            --highlight-border:#0a84ff;
+            --warning-bg:#fff3cd;
+            --warning-border:#ffeeba;
+            --table-header-bg:#bfdbfe;
+            --table-header-text:#1e3a8a;
+        }
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem 1.5rem;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
         .page{width:100%;max-width:1400px;margin:0 auto}
@@ -17,8 +67,8 @@
         .nav-back:hover{background:rgba(10,132,255,.18)}
         .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
         h1{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;color:var(--text);line-height:1.2}
-        h2{font-size:1rem;font-weight:600;color:var(--text);letter-spacing:-.01em;margin-bottom:.75rem}
-        h3{font-size:.92rem;font-weight:600;color:var(--text);text-align:center}
+        h2{font-size:1.05rem;font-weight:600;color:var(--text);letter-spacing:-.01em;margin-bottom:.75rem}
+        h3{font-size:.95rem;font-weight:600;color:var(--text);text-align:center}
         .panel{background:var(--surface);padding:1.25rem;border-radius:14px;border:1px solid var(--border);transition:background .3s,border-color .3s}
         .global-config{background:var(--highlight-bg);border:1px solid var(--highlight-border);margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:1rem 1.25rem;border-radius:14px}
         .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -29,36 +79,33 @@
         button.danger{background-color:var(--red)}button.danger:hover{background-color:var(--red-hover)}
         button.success{background-color:var(--green)}button.success:hover{background-color:var(--green-hover)}
         button.purple{background-color:#8b5cf6}button.purple:hover{background-color:#7c3aed}
-        .input-section{background:var(--surface-2);padding:1.1rem;border-radius:10px;margin-bottom:1rem;border:1px solid var(--border)}
-        .form-group{display:flex;flex-direction:column;gap:5px}
-        label{font-size:.78rem;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em}
-        input,select{font-family:'Inter',sans-serif;padding:.55rem .7rem;border:1px solid var(--border-strong);border-radius:8px;font-size:.82rem;background-color:var(--surface);color:var(--text);transition:border-color .2s; width: 100%;}
-        input:focus,select:focus{outline:none;border-color:var(--accent)}
-        .table-container{overflow-x:auto;border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-bottom:1rem;}
-        table{width:100%;border-collapse:collapse}
-        th,td{border-bottom:1px solid var(--border);padding:.65rem .75rem;text-align:center;font-size:.82rem; white-space:nowrap;}
-        th{background-color:var(--table-header);font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em;font-size:.72rem}
-        td button.danger{padding:4px 10px;font-size:.72rem;border-radius:6px}
+        .theme-toggle{background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);display:flex;align-items:center;gap:6px;border-radius:10px;padding:.45rem .8rem;font-size:.82rem}
+        .theme-toggle:hover{background:var(--surface-3)}
+
+        /* Formato de Tabla de Datos */
+        .table-container{overflow-x:auto;border-radius:10px;border:1px solid var(--border);background:var(--surface);margin-bottom:1rem;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem}
+        th{background-color:var(--table-header-bg);color:var(--table-header-text);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:.74rem;padding:0.75rem 0.6rem;border:1px solid var(--border);text-align:center;white-space:nowrap}
+        td{border:1px solid var(--border);padding:.45rem .45rem;text-align:center;vertical-align:middle}
+        
+        .table-input{width:100%;border:1px solid var(--border-strong);padding:.45rem .55rem;border-radius:6px;background:var(--surface-2);color:var(--text);font-family:'Inter',sans-serif;font-size:.84rem;text-align:center;transition:border-color .18s,background-color .18s}
+        .table-input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+
         #graph-container{width:100%;height:600px;border:1px solid var(--border);border-radius:12px;background-color:var(--graph-bg);margin-bottom:1rem}
         .solver-section{display:none;margin-top:0;padding:1.25rem;border:1px solid var(--highlight-border);background-color:var(--highlight-bg);border-radius:14px}
         .step-controls{display:flex;gap:12px;justify-content:center;align-items:center;margin-bottom:1rem;padding:.8rem 1rem;background:var(--surface);border-radius:10px;border:1px solid var(--border)}
         #step-info{font-size:.82rem;font-weight:600;color:var(--text-2)}
-        #step-description{background:var(--surface);padding:1.25rem;border:1px solid var(--border);border-radius:10px;min-height:100px;line-height:1.7;font-size:.88rem; overflow-x: auto;}
-        #step-description table{margin:.75rem 0}#step-description th,#step-description td{padding:.5rem .65rem}#step-description strong{color:var(--accent)}
-        .theme-toggle{background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);display:flex;align-items:center;gap:6px;border-radius:10px;padding:.45rem .8rem;font-size:.82rem}
-        .theme-toggle:hover{background:var(--surface-3)}
-        
-        .cpm-node-html { display:flex; flex-direction:column; background:var(--surface); border:2px solid var(--border); border-radius:8px; overflow:hidden; font-family:'Inter',sans-serif; color:var(--text); width:120px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .cpm-node-html.critical { border-color: var(--red); }
-        .cpm-node-header { background:var(--surface-2); padding:4px; text-align:center; font-weight:bold; font-size:14px; border-bottom:1px solid var(--border); }
-        .cpm-node-html.critical .cpm-node-header { background:rgba(255,69,58,0.2); color:var(--red); }
-        .cpm-node-body { display:flex; justify-content:space-between; padding:4px; font-size:12px; }
-        .cpm-node-footer { display:flex; justify-content:space-between; padding:4px; font-size:12px; border-top:1px solid var(--border); background:var(--surface-3); }
+        #step-description{background:var(--surface);padding:1.25rem;border:1px solid var(--border);border-radius:10px;min-height:100px;line-height:1.7;font-size:.88rem;overflow-x:auto}
+        #step-description table{margin:.75rem 0}
+        #step-description th,#step-description td{padding:.5rem .65rem}
+        #step-description strong{color:var(--accent)}
+
+        .conclusion-box{margin-top:20px;padding:18px 22px;background:var(--highlight-bg);border:2px solid var(--accent);border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.12)}
 
         #main-flex.full-log-mode{flex-direction:column}
         #main-flex.full-log-mode>div:last-child{order:-1;width:100%}
         #main-flex.full-log-mode>div.solver-section{width:100%}
-        @media(max-width:900px){#main-flex{flex-direction:column!important}#graph-container{height:400px}}
+        @media(max-width:900px){#main-flex{flex-direction:column!important}#graph-container{height:420px}}
         @media(max-width:480px){body{padding:1rem .75rem}}
     </style>
 </head>
@@ -72,7 +119,7 @@
 
     <div id="global-config" class="panel global-config">
         <div style="display:flex;gap:12px;align-items:center">
-            <label style="text-transform:none;color:var(--text);font-size:.85rem">Gestión de Proyectos — Ruta Crítica (AON)</label>
+            <label style="text-transform:none;color:var(--text);font-size:.85rem;font-weight:600">Gestión de Proyectos — Ruta Crítica y Compresión (AON)</label>
         </div>
         <div class="controls">
             <button id="btn-example">Ejemplo Simple</button>
@@ -86,45 +133,35 @@
 
     <div id="main-flex" style="display:flex;gap:20px;align-items:flex-start">
         <div id="data-entry-panel" style="flex:1;min-width:0;width:100%">
-            <h2>Ingreso de Actividades</h2>
-            <div class="input-section">
-                <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-                    <div class="form-group" style="flex:1;min-width:100px;"><label>Actividad:</label><input type="text" id="act-id" placeholder="Ej: A"></div>
-                    <div class="form-group" style="flex:2;min-width:150px;"><label>Descripción:</label><input type="text" id="act-desc" placeholder="Ej: Tareas iniciales"></div>
-                    <div class="form-group" style="flex:1;min-width:100px;"><label>Predecesoras:</label><input type="text" id="act-pred" placeholder="Ej: A, B (vacío si no hay)"></div>
-                </div>
-                
-                <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;background:var(--surface-3);padding:10px;border-radius:8px;">
-                    <div class="form-group" style="flex:1;min-width:100px;"><label>Tiempo Normal (τ):</label><input type="number" id="act-tn" placeholder="0"></div>
-                    <div class="form-group" style="flex:1;min-width:100px;"><label>Tiempo Acelerado (τ'):</label><input type="number" id="act-ta" placeholder="0"></div>
-                    <div class="form-group" style="flex:1;min-width:100px;"><label>Costo Normal (C):</label><input type="number" id="act-cn" placeholder="0"></div>
-                    <div class="form-group" style="flex:1;min-width:100px;"><label>Costo Acelerado (C'):</label><input type="number" id="act-ca" placeholder="0"></div>
-                </div>
-                <div style="text-align:right"><button id="btn-add-act" class="success">Agregar Actividad</button></div>
-            </div>
-
+            <h2>Ingreso y Edición de Actividades</h2>
+            
             <div class="table-container">
                 <table id="data-table">
                     <thead>
                         <tr>
-                            <th>Actividad</th>
-                            <th>Descripción</th>
-                            <th>Predec.</th>
-                            <th>T. Normal (τ)</th>
-                            <th>T. Acel (τ')</th>
-                            <th>C. Normal (C)</th>
-                            <th>C. Acel (C')</th>
-                            <th>Acción</th>
+                            <th style="width:110px">ACTIVIDAD</th>
+                            <th style="width:140px">PRECEDENTE</th>
+                            <th style="width:130px">TIEMPO NORMAL</th>
+                            <th style="width:130px">TIEMPO MÍNIMO</th>
+                            <th style="width:130px">COSTE NORMAL</th>
+                            <th style="width:130px">COSTE MÍNIMO</th>
+                            <th style="width:150px">COSTO MARGINAL</th>
+                            <th style="width:70px">ACCIÓN</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
 
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px">
+                <button id="btn-add-row" class="success" style="font-size:0.84rem;padding:0.6rem 1.1rem">➕ Agregar Actividad / Fila</button>
+                <div style="font-size:0.8rem;color:var(--text-2)">* Puedes editar directamente los valores en cualquier celda.</div>
+            </div>
+
             <div class="panel" style="margin-top:16px">
-                <div class="form-group" style="margin-bottom:12px">
-                    <label>Modo de Resolución:</label>
-                    <select id="solve-mode" style="padding:8px;width:100%">
+                <div class="form-group" style="margin-bottom:12px;display:flex;flex-direction:column;gap:6px">
+                    <label style="font-size:0.78rem;font-weight:600;color:var(--text-2);text-transform:uppercase">Modo de Resolución:</label>
+                    <select id="solve-mode" style="padding:8px 10px;border-radius:8px;background:var(--surface-2);color:var(--text);border:1px solid var(--border-strong);font-size:0.85rem">
                         <option value="cpm">Solo Ruta Crítica (CPM)</option>
                         <option value="crash">Intercambios Tiempo-Costo (Crash)</option>
                     </select>
@@ -151,24 +188,25 @@
 // ═══ CPM SOLVER ═══
 class CPMSolver {
     constructor(activities, mode = 'cpm') {
-        // activities: array of {id, desc, pred:[], tn, ta, cn, ca}
         this.activities = JSON.parse(JSON.stringify(activities));
         this.mode = mode;
         this.steps = [];
         this.graphHistory = [];
+        this.nodeHistories = {};
     }
 
     solve() {
         if (this.activities.length === 0) return [];
-        this.steps = []; this.graphHistory = [];
+        this.steps = []; 
+        this.graphHistory = [];
+        this.nodeHistories = {};
 
-        // Build adjacency list
         let adj = {}, revAdj = {}, nodes = {};
         let allIds = this.activities.map(a => a.id);
         
         for (let a of this.activities) {
             adj[a.id] = [];
-            revAdj[a.id] = a.pred.filter(p => allIds.includes(p));
+            revAdj[a.id] = (a.pred || []).filter(p => allIds.includes(p));
             nodes[a.id] = { ...a, duration: a.tn };
         }
         for (let id in revAdj) {
@@ -177,7 +215,6 @@ class CPMSolver {
             }
         }
 
-        // Add INICIO and FIN dummy nodes
         let starts = allIds.filter(id => revAdj[id].length === 0);
         let ends = allIds.filter(id => adj[id].length === 0);
         
@@ -191,8 +228,8 @@ class CPMSolver {
         for (let e of ends) adj[e].push('FIN');
 
         let allNodes = ['INICIO', ...allIds, 'FIN'];
+        allNodes.forEach(id => { this.nodeHistories[id] = []; });
 
-        // Topological Sort
         let topo = [], visited = new Set(), tempMark = new Set(), hasCycle = false;
         const visit = (n) => {
             if (tempMark.has(n)) hasCycle = true;
@@ -208,9 +245,7 @@ class CPMSolver {
         
         if (hasCycle) { alert("Error: El proyecto contiene ciclos circulares."); return []; }
 
-        // CPM Calculation function
         const calcCPM = (currentNodes) => {
-            // Forward pass
             for (let n of topo) {
                 let node = currentNodes[n];
                 if (revAdj[n].length === 0) {
@@ -221,7 +256,6 @@ class CPMSolver {
                 node.EF = node.ES + node.duration;
             }
             
-            // Backward pass
             let projectDuration = currentNodes['FIN'].EF;
             let revTopo = [...topo].reverse();
             for (let n of revTopo) {
@@ -242,13 +276,24 @@ class CPMSolver {
 
         let iter = 1;
         let cpmState = calcCPM(nodes);
-        let totalCost = this.activities.reduce((sum, a) => sum + (a.cn || 0), 0);
+        let initialDuration = cpmState.duration;
+        let initialCost = this.activities.reduce((sum, a) => sum + (a.cn || 0), 0);
+        let totalCost = initialCost;
 
-        // Record initial state
-        this._recordStep(iter, "Estado Inicial del Proyecto", cpmState, totalCost);
+        // Record initial node histories
+        for (let id of allNodes) {
+            let nd = cpmState.nodes[id];
+            this.nodeHistories[id].push({
+                early: nd.EF,
+                late: nd.LF,
+                isCrit: nd.isCritical,
+                dur: nd.duration
+            });
+        }
+
+        this._recordStep(iter, "Estado Inicial del Proyecto", cpmState, totalCost, false, initialDuration, initialCost);
         
         if (this.mode === 'crash') {
-            // Pre-calculate limits and slopes
             for (let a of this.activities) {
                 let n = nodes[a.id];
                 n.maxReduction = Math.max(0, n.tn - n.ta);
@@ -258,35 +303,49 @@ class CPMSolver {
 
             while (true) {
                 iter++;
-                // Find critical activities that can be crashed
                 let candidates = cpmState.criticalPath.map(id => nodes[id])
                     .filter(n => n.crashedSoFar < n.maxReduction);
                 
                 if (candidates.length === 0) {
-                    this._recordStep(iter, "**Fin de la compresión:** No hay más actividades en la ruta crítica que se puedan acelerar.", cpmState, totalCost);
+                    this._recordStep(iter, "**Fin de la compresión:** Se alcanzó la reducción máxima posible en todas las actividades de la ruta crítica.", cpmState, totalCost, true, initialDuration, initialCost);
                     break;
                 }
 
-                // Pick the one with min K_i
                 candidates.sort((a, b) => a.crashCostPerUnit - b.crashCostPerUnit);
                 let target = candidates[0];
 
-                // Crash by 1 unit
-                target.duration -= 1;
-                target.crashedSoFar += 1;
-                totalCost += target.crashCostPerUnit;
+                let maxDelta = target.maxReduction - target.crashedSoFar;
+                let prevDuration = target.duration;
 
-                // Recalculate CPM
+                target.duration -= maxDelta;
+                target.crashedSoFar += maxDelta;
+                let addedCost = maxDelta * target.crashCostPerUnit;
+                totalCost += addedCost;
+
                 let newState = calcCPM(nodes);
 
-                let desc = `**Iteración de Compresión ${iter-1}**\n`;
-                desc += `Se aceleró la actividad **${target.id}** en 1 unidad.\n`;
-                desc += `Costo marginal: $${target.crashCostPerUnit.toFixed(2)}\n`;
-                desc += `Nueva duración del proyecto: **${newState.duration}**\n`;
-                desc += `Nuevo costo total: **$${totalCost.toFixed(2)}**\n`;
-                desc += `Nueva Ruta Crítica: ${newState.criticalPath.join(' → ')}`;
+                // Record history for this iteration
+                for (let id of allNodes) {
+                    let nd = newState.nodes[id];
+                    this.nodeHistories[id].push({
+                        early: nd.EF,
+                        late: nd.LF,
+                        isCrit: nd.isCritical,
+                        dur: nd.duration
+                    });
+                }
 
-                this._recordStep(iter, desc, newState, totalCost);
+                let desc = `**Iteración de Compresión ${iter-1}**\n`;
+                desc += `Se redujo la actividad crítica **${target.id}** en su capacidad máxima posible: **${maxDelta}** unidades (de ${prevDuration} a ${target.duration}).\n`;
+                desc += `• Reducción máxima total ($M_${target.id} = \\tau_${target.id} - \\tau'_${target.id}$): ${target.maxReduction} unidades.\n`;
+                desc += `• Costo marginal unitario ($K_${target.id}$): $${target.crashCostPerUnit.toFixed(2)} / unidad.\n`;
+                desc += `• Costo adicional de compresión: **$${addedCost.toFixed(2)}**.\n`;
+                desc += `• Nueva duración del proyecto: **${newState.duration}** unidades de tiempo.\n`;
+                desc += `• Nuevo costo total del proyecto: **$${totalCost.toFixed(2)}**.\n`;
+                desc += `• Nueva Ruta Crítica: ${newState.criticalPath.join(' → ')}`;
+
+                let isFinal = false; // Next iteration will evaluate if more candidates exist
+                this._recordStep(iter, desc, newState, totalCost, isFinal, initialDuration, initialCost);
                 cpmState = newState;
             }
         }
@@ -294,23 +353,53 @@ class CPMSolver {
         return { steps: this.steps, graphs: this.graphHistory, adj, revAdj };
     }
 
-    _recordStep(iter, titleDesc, state, totalCost) {
+    _recordStep(iter, titleDesc, state, totalCost, isFinal, initialDuration, initialCost) {
         let nodeData = JSON.parse(JSON.stringify(state.nodes));
+        let historiesSnapshot = JSON.parse(JSON.stringify(this.nodeHistories));
         
-        let htmlTable = `<table><tr><th>Act</th><th>Dur</th><th>ES</th><th>EF</th><th>LS</th><th>LF</th><th>Holgura</th><th>Crítica?</th></tr>`;
+        for (let id in nodeData) {
+            nodeData[id].history = historiesSnapshot[id] || [];
+        }
+
+        let htmlTable = `<table><thead><tr><th>Actividad</th><th>Duración</th><th>ES</th><th>EF</th><th>LS</th><th>LF</th><th>Holgura</th><th>¿Crítica?</th></tr></thead><tbody>`;
         for (let id in nodeData) {
             if (id === 'INICIO' || id === 'FIN') continue;
             let n = nodeData[id];
             htmlTable += `<tr style="${n.isCritical ? 'background:rgba(255,69,58,0.1)' : ''}">
                 <td><strong>${id}</strong></td><td>${n.duration}</td>
                 <td>${n.ES}</td><td>${n.EF}</td><td>${n.LS}</td><td>${n.LF}</td>
-                <td>${n.slack}</td><td>${n.isCritical ? 'Sí' : 'No'}</td>
+                <td>${n.slack}</td><td style="font-weight:600;color:${n.isCritical ? 'var(--red)' : 'var(--text)'}">${n.isCritical ? 'Sí' : 'No'}</td>
             </tr>`;
         }
-        htmlTable += `</table>`;
+        htmlTable += `</tbody></table>`;
         htmlTable += `<br><strong>Duración del Proyecto:</strong> ${state.duration} unidades de tiempo.<br>`;
         htmlTable += `<strong>Costo Total:</strong> $${totalCost.toFixed(2)}<br>`;
         htmlTable += `<strong>Ruta Crítica:</strong> ${state.criticalPath.join(' → ')}`;
+
+        // Add Professor's Conclusion if this is the final step in crash mode
+        if (isFinal && this.mode === 'crash') {
+            let dIni = initialDuration;
+            let dFin = state.duration;
+            let cIni = initialCost;
+            let cFin = totalCost;
+
+            let pctD = dIni > 0 ? ((dIni - dFin) / dIni) * 100 : 0;
+            let pctC = cIni > 0 ? ((cFin - cIni) / cIni) * 100 : 0;
+
+            let pctDStr = pctD.toFixed(2).replace('.', ',');
+            let pctCStr = pctC.toFixed(2).replace('.', ',');
+
+            htmlTable += `
+            <div class="conclusion-box">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                    <span style="font-size:1.3rem">📋</span>
+                    <h4 style="margin:0;color:var(--accent);font-size:1.05rem;font-weight:700">Conclusión del Análisis de Aceleración</h4>
+                </div>
+                <p style="font-size:0.95rem;line-height:1.75;color:var(--text);margin:0;font-style:italic">
+                    “Tras el análisis de aceleración, se determinó que es posible acortar la duración del proyecto en un <strong>${pctDStr}%</strong>, bajando de <strong>${dIni}</strong> a <strong>${dFin}</strong> días. Sin embargo, esta decisión no es proporcionalmente económica ya que exige asumir un incremento del <strong>${pctCStr}%</strong> sobre el presupuesto inicial.”
+                </p>
+            </div>`;
+        }
 
         this.steps.push({
             iteration: iter,
@@ -322,124 +411,143 @@ class CPMSolver {
     }
 }
 
-// ═══ APP STATE ═══
+// ═══ APP STATE & INTERACTIVE TABLE ═══
 let activities = [];
 let solverResult = null;
 let currentStepIndex = 0;
 let isFullLogMode = false;
 let isDarkTheme = true;
 let network = null;
+let cachedNodePositions = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     setupEvents();
-    renderTable();
+    loadExampleCost(); // Default with example
 });
 
-function setupEvents() {
-    document.getElementById('btn-add-act').addEventListener('click', addActivity);
-    document.getElementById('btn-clear').addEventListener('click', clearAll);
-    document.getElementById('btn-example').addEventListener('click', loadExampleSimple);
-    document.getElementById('btn-example-cost').addEventListener('click', loadExampleCost);
-    document.getElementById('btn-save').addEventListener('click', () => {
-        let b=new Blob([JSON.stringify(activities,null,2)],{type:'application/json'});
-        let u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`cpm_${Date.now()}.json`;document.body.appendChild(a);a.click();URL.revokeObjectURL(u);
-    });
-    document.getElementById('btn-load').addEventListener('click',()=>document.getElementById('file-load').click());
-    document.getElementById('file-load').addEventListener('change',e=>{
-        let f=e.target.files[0];if(!f)return;let r=new FileReader();
-        r.onload=ev=>{try{activities=JSON.parse(ev.target.result);renderTable();}catch(err){alert("Error al cargar.");}document.getElementById('file-load').value='';};
-        r.readAsText(f);
-    });
-    document.getElementById('btn-solve').addEventListener('click', solveProblem);
-    document.getElementById('btn-back-edit').addEventListener('click', backToEdit);
-    document.getElementById('btn-prev-step').addEventListener('click', ()=>changeStep(-1));
-    document.getElementById('btn-next-step').addEventListener('click', ()=>changeStep(1));
-    document.getElementById('btn-theme').addEventListener('click', toggleTheme);
-    setupFullLog();
-}
-
-function addActivity() {
-    let id = document.getElementById('act-id').value.trim().toUpperCase();
-    let desc = document.getElementById('act-desc').value.trim();
-    let predRaw = document.getElementById('act-pred').value.toUpperCase();
-    let tn = parseFloat(document.getElementById('act-tn').value) || 0;
-    let ta = parseFloat(document.getElementById('act-ta').value) || tn;
-    let cn = parseFloat(document.getElementById('act-cn').value) || 0;
-    let ca = parseFloat(document.getElementById('act-ca').value) || cn;
-
-    if (!id) { alert("ID de actividad es obligatorio."); return; }
-    if (activities.find(a => a.id === id)) { alert("Actividad ya existe."); return; }
-
-    let pred = predRaw.split(',').map(s => s.trim()).filter(s => s !== '');
-    
-    activities.push({ id, desc, pred, tn, ta, cn, ca });
-    
-    document.getElementById('act-id').value = '';
-    document.getElementById('act-desc').value = '';
-    document.getElementById('act-pred').value = '';
-    document.getElementById('act-tn').value = '';
-    document.getElementById('act-ta').value = '';
-    document.getElementById('act-cn').value = '';
-    document.getElementById('act-ca').value = '';
-    
-    renderTable();
-}
-
-function removeActivity(id) {
-    activities = activities.filter(a => a.id !== id);
-    renderTable();
+function calcKm(a) {
+    let tn = parseFloat(a.tn) || 0;
+    let ta = parseFloat(a.ta) || 0;
+    let cn = parseFloat(a.cn) || 0;
+    let ca = parseFloat(a.ca) || 0;
+    let m = tn - ta;
+    if (m <= 0) return '—';
+    let k = (ca - cn) / m;
+    return `$${k.toFixed(2)}/u`;
 }
 
 function renderTable() {
-    let tb = document.querySelector('#data-table tbody');
+    let tb = document.getElementById('table-body');
     tb.innerHTML = '';
-    activities.forEach(a => {
+    activities.forEach((a, idx) => {
         let tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${a.id}</strong></td>
-            <td>${a.desc}</td>
-            <td>${a.pred.join(', ')}</td>
-            <td>${a.tn}</td>
-            <td>${a.ta}</td>
-            <td>$${a.cn}</td>
-            <td>$${a.ca}</td>
-            <td><button class="danger" onclick="removeActivity('${a.id}')">✕</button></td>
+            <td><input type="text" class="table-input" style="font-weight:700;text-transform:uppercase;" value="${a.id || ''}" oninput="updateActivityField(${idx}, 'id', this.value)"></td>
+            <td><input type="text" class="table-input" style="text-transform:uppercase;" placeholder="—" value="${(a.pred||[]).join(', ')}" oninput="updateActivityField(${idx}, 'pred', this.value)"></td>
+            <td><input type="number" step="any" class="table-input" value="${a.tn !== undefined ? a.tn : ''}" oninput="updateActivityField(${idx}, 'tn', this.value)"></td>
+            <td><input type="number" step="any" class="table-input" value="${a.ta !== undefined ? a.ta : ''}" oninput="updateActivityField(${idx}, 'ta', this.value)"></td>
+            <td><input type="number" step="any" class="table-input" value="${a.cn !== undefined ? a.cn : ''}" oninput="updateActivityField(${idx}, 'cn', this.value)"></td>
+            <td><input type="number" step="any" class="table-input" value="${a.ca !== undefined ? a.ca : ''}" oninput="updateActivityField(${idx}, 'ca', this.value)"></td>
+            <td style="font-weight:700;color:var(--accent);" id="km-cell-${idx}">${calcKm(a)}</td>
+            <td><button class="danger" style="padding:4px 8px;border-radius:6px;font-size:0.75rem" onclick="removeRow(${idx})" title="Eliminar fila">✕</button></td>
         `;
         tb.appendChild(tr);
     });
 }
 
+function updateActivityField(index, field, value) {
+    if (!activities[index]) return;
+    if (field === 'pred') {
+        activities[index].pred = value.toUpperCase().split(',').map(s => s.trim()).filter(s => s !== '');
+    } else if (field === 'id') {
+        activities[index].id = value.toUpperCase().trim();
+    } else {
+        activities[index][field] = parseFloat(value) || 0;
+    }
+    let kmElem = document.getElementById(`km-cell-${index}`);
+    if (kmElem) kmElem.innerText = calcKm(activities[index]);
+}
+
+function addRow() {
+    let usedIds = new Set(activities.map(a => a.id));
+    let nextChar = 'A';
+    for (let i = 0; i < 26; i++) {
+        let ch = String.fromCharCode(65 + i);
+        if (!usedIds.has(ch)) { nextChar = ch; break; }
+    }
+    activities.push({ id: nextChar, desc: '', pred: [], tn: 1, ta: 1, cn: 0, ca: 0 });
+    renderTable();
+}
+
+function removeRow(index) {
+    activities.splice(index, 1);
+    renderTable();
+}
+
+function setupEvents() {
+    document.getElementById('btn-add-row').addEventListener('click', addRow);
+    document.getElementById('btn-clear').addEventListener('click', clearAll);
+    document.getElementById('btn-example').addEventListener('click', loadExampleSimple);
+    document.getElementById('btn-example-cost').addEventListener('click', loadExampleCost);
+    document.getElementById('btn-save').addEventListener('click', () => {
+        let b = new Blob([JSON.stringify(activities, null, 2)], { type: 'application/json' });
+        let u = URL.createObjectURL(b), a = document.createElement('a');
+        a.href = u; a.download = `cpm_${Date.now()}.json`;
+        document.body.appendChild(a); a.click(); URL.revokeObjectURL(u);
+    });
+    document.getElementById('btn-load').addEventListener('click', () => document.getElementById('file-load').click());
+    document.getElementById('file-load').addEventListener('change', e => {
+        let f = e.target.files[0]; if (!f) return;
+        let r = new FileReader();
+        r.onload = ev => {
+            try { activities = JSON.parse(ev.target.result); cachedNodePositions = {}; renderTable(); }
+            catch (err) { alert("Error al cargar archivo."); }
+            document.getElementById('file-load').value = '';
+        };
+        r.readAsText(f);
+    });
+    document.getElementById('btn-solve').addEventListener('click', solveProblem);
+    document.getElementById('btn-back-edit').addEventListener('click', backToEdit);
+    document.getElementById('btn-prev-step').addEventListener('click', () => changeStep(-1));
+    document.getElementById('btn-next-step').addEventListener('click', () => changeStep(1));
+    document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+    setupFullLog();
+}
+
 function clearAll() {
     activities = [];
+    cachedNodePositions = {};
     renderTable();
-    if(network) network.destroy();
-    document.getElementById('solver-panel').style.display='none';
-    document.getElementById('data-entry-panel').style.display='block';
+    if (network) network.destroy();
+    document.getElementById('solver-panel').style.display = 'none';
+    document.getElementById('data-entry-panel').style.display = 'block';
 }
 
 function loadExampleSimple() {
+    cachedNodePositions = {};
     activities = [
-        {id:'A', desc:'Planos', pred:[], tn:5, ta:5, cn:0, ca:0},
-        {id:'B', desc:'Arrendatarios', pred:[], tn:6, ta:6, cn:0, ca:0},
-        {id:'C', desc:'Prospectos', pred:['A'], tn:4, ta:4, cn:0, ca:0},
-        {id:'D', desc:'Contratista', pred:['A'], tn:3, ta:3, cn:0, ca:0},
-        {id:'E', desc:'Permisos', pred:['A'], tn:1, ta:1, cn:0, ca:0},
-        {id:'F', desc:'Aprobación', pred:['E'], tn:4, ta:4, cn:0, ca:0},
-        {id:'G', desc:'Construcción', pred:['D','F'], tn:14, ta:14, cn:0, ca:0},
-        {id:'H', desc:'Contratos', pred:['B','C'], tn:12, ta:12, cn:0, ca:0},
-        {id:'I', desc:'Mudanza', pred:['G','H'], tn:2, ta:2, cn:0, ca:0}
+        { id: 'A', desc: 'Planos', pred: [], tn: 5, ta: 5, cn: 0, ca: 0 },
+        { id: 'B', desc: 'Arrendatarios', pred: [], tn: 6, ta: 6, cn: 0, ca: 0 },
+        { id: 'C', desc: 'Prospectos', pred: ['A'], tn: 4, ta: 4, cn: 0, ca: 0 },
+        { id: 'D', desc: 'Contratista', pred: ['A'], tn: 3, ta: 3, cn: 0, ca: 0 },
+        { id: 'E', desc: 'Permisos', pred: ['A'], tn: 1, ta: 1, cn: 0, ca: 0 },
+        { id: 'F', desc: 'Aprobación', pred: ['E'], tn: 4, ta: 4, cn: 0, ca: 0 },
+        { id: 'G', desc: 'Construcción', pred: ['D', 'F'], tn: 14, ta: 14, cn: 0, ca: 0 },
+        { id: 'H', desc: 'Contratos', pred: ['B', 'C'], tn: 12, ta: 12, cn: 0, ca: 0 },
+        { id: 'I', desc: 'Mudanza', pred: ['G', 'H'], tn: 2, ta: 2, cn: 0, ca: 0 }
     ];
     document.getElementById('solve-mode').value = 'cpm';
     renderTable();
 }
 
 function loadExampleCost() {
+    cachedNodePositions = {};
     activities = [
-        {id:'A', desc:'Actividad A', pred:[], tn:7, ta:4, cn:500, ca:800},
-        {id:'B', desc:'Actividad B', pred:[], tn:3, ta:2, cn:200, ca:350},
-        {id:'C', desc:'Actividad C', pred:[], tn:6, ta:4, cn:500, ca:900},
-        {id:'D', desc:'Actividad D', pred:['A'], tn:3, ta:1, cn:200, ca:500},
-        {id:'E', desc:'Actividad E', pred:['B','C'], tn:2, ta:1, cn:300, ca:550}
+        { id: 'A', desc: 'Actividad A', pred: [], tn: 7, ta: 4, cn: 500, ca: 800 },
+        { id: 'B', desc: 'Actividad B', pred: [], tn: 3, ta: 2, cn: 200, ca: 350 },
+        { id: 'C', desc: 'Actividad C', pred: [], tn: 6, ta: 4, cn: 500, ca: 900 },
+        { id: 'D', desc: 'Actividad D', pred: ['A'], tn: 3, ta: 1, cn: 200, ca: 500 },
+        { id: 'E', desc: 'Actividad E', pred: ['B', 'C'], tn: 2, ta: 1, cn: 300, ca: 550 }
     ];
     document.getElementById('solve-mode').value = 'crash';
     renderTable();
@@ -463,8 +571,8 @@ function solveProblem() {
 
 function changeStep(d) {
     currentStepIndex += d;
-    if(currentStepIndex < 0) currentStepIndex = 0;
-    if(currentStepIndex >= solverResult.steps.length) currentStepIndex = solverResult.steps.length - 1;
+    if (currentStepIndex < 0) currentStepIndex = 0;
+    if (currentStepIndex >= solverResult.steps.length) currentStepIndex = solverResult.steps.length - 1;
     renderStep();
 }
 
@@ -474,139 +582,302 @@ function renderStep() {
     document.getElementById('btn-next-step').disabled = currentStepIndex === solverResult.steps.length - 1;
     document.getElementById('step-info').innerText = `Paso ${currentStepIndex + 1} de ${solverResult.steps.length}`;
     
-    let h = s.description.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    let h = s.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
     if (s.tableHTML) h += "<br>" + s.tableHTML;
     document.getElementById('step-description').innerHTML = h;
     
     drawGraph(solverResult.graphs[currentStepIndex], solverResult.adj);
 }
 
+function createVerticalNodeSVG(id, n, isCrit, isDarkTheme) {
+    let bg = isDarkTheme ? (isCrit ? '#241215' : '#1c1c20') : (isCrit ? '#fff5f5' : '#ffffff');
+    let headerBg = isCrit ? (isDarkTheme ? '#7f1d1d' : '#ffcccc') : (isDarkTheme ? '#1e3a8a' : '#dbeafe');
+    let border = isCrit ? '#ff453a' : (isDarkTheme ? '#3b82f6' : '#2563eb');
+    let txt = isDarkTheme ? '#f3f4f6' : '#111827';
+    let headerTxt = isCrit ? (isDarkTheme ? '#fca5a5' : '#991b1b') : (isDarkTheme ? '#bfdbfe' : '#1e3a8a');
+    let divColor = isDarkTheme ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.14)';
+
+    let history = n.history && n.history.length > 0 ? n.history : [{ early: n.EF || 0, late: n.LF || 0, isCrit: isCrit }];
+    let numRows = Math.max(1, history.length);
+    let rowH = 26;
+    let headerH = 32;
+    let cardW = 88;
+    let cardH = headerH + numRows * rowH + 4;
+
+    let rowsSvg = '';
+    history.forEach((hRow, idx) => {
+        let y = headerH + idx * rowH;
+        let isLast = idx === history.length - 1;
+        let rowFill = isLast && isCrit ? (isDarkTheme ? 'rgba(255,69,58,0.15)' : 'rgba(255,69,58,0.1)') : 'transparent';
+        let rowTxtColor = isLast && isCrit ? (isDarkTheme ? '#ff8585' : '#dc2626') : txt;
+        let fontWeight = isLast ? '700' : '500';
+        let fontSize = isLast ? '14' : '12';
+
+        if (rowFill !== 'transparent') {
+            rowsSvg += `<rect x="2" y="${y}" width="${cardW - 4}" height="${rowH}" fill="${rowFill}"/>`;
+        }
+
+        // Left column (Early time)
+        rowsSvg += `<text x="${cardW / 4}" y="${y + 18}" font-family="'Inter', sans-serif" font-size="${fontSize}" font-weight="${fontWeight}" fill="${rowTxtColor}" text-anchor="middle">${hRow.early !== undefined ? hRow.early : 0}</text>`;
+        
+        // Right column (Late time)
+        rowsSvg += `<text x="${(3 * cardW) / 4}" y="${y + 18}" font-family="'Inter', sans-serif" font-size="${fontSize}" font-weight="${fontWeight}" fill="${rowTxtColor}" text-anchor="middle">${hRow.late !== undefined ? hRow.late : 0}</text>`;
+
+        if (idx < numRows - 1) {
+            rowsSvg += `<line x1="2" y1="${y + rowH}" x2="${cardW - 2}" y2="${y + rowH}" stroke="${divColor}" stroke-width="1"/>`;
+        }
+    });
+
+    let svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${cardW}" height="${cardH}" viewBox="0 0 ${cardW} ${cardH}">
+        <!-- Outer Card -->
+        <rect x="1" y="1" width="${cardW - 2}" height="${cardH - 2}" rx="7" ry="7" fill="${bg}" stroke="${border}" stroke-width="2"/>
+        
+        <!-- Header: Letra -->
+        <path d="M 1 7 Q 1 1 7 1 L ${cardW - 7} 1 Q ${cardW - 1} 1 ${cardW - 1} 7 L ${cardW - 1} ${headerH} L 1 ${headerH} Z" fill="${headerBg}"/>
+        <text x="${cardW / 2}" y="${headerH - 10}" font-family="'Inter', -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="700" fill="${headerTxt}" text-anchor="middle">${id}</text>
+        <line x1="1" y1="${headerH}" x2="${cardW - 1}" y2="${headerH}" stroke="${border}" stroke-width="1.5"/>
+        
+        <!-- Vertical Center Divider -->
+        <line x1="${cardW / 2}" y1="${headerH}" x2="${cardW / 2}" y2="${cardH - 2}" stroke="${border}" stroke-width="1.5"/>
+        
+        <!-- Iteration Rows -->
+        ${rowsSvg}
+    </svg>`;
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
 function drawGraph(graphState, adj) {
     let nodes = new vis.DataSet();
     let edges = new vis.DataSet();
     let nodeData = graphState.nodes;
-
-    // Use hierarchical layout for AON graph
     let nodeIds = Object.keys(nodeData);
-    
+
+    // Compute topological levels for clean automatic 2D placement
+    let levels = { 'INICIO': 0 };
+    let q = ['INICIO'];
+    while (q.length > 0) {
+        let u = q.shift();
+        let nexts = adj[u] || [];
+        for (let v of nexts) {
+            let lvl = (levels[u] || 0) + 1;
+            if (levels[v] === undefined || lvl > levels[v]) {
+                levels[v] = lvl;
+                q.push(v);
+            }
+        }
+    }
+    for (let id of nodeIds) {
+        if (levels[id] === undefined) levels[id] = 1;
+    }
+
+    let nodesByLevel = {};
+    for (let id of nodeIds) {
+        let lvl = levels[id] !== undefined ? levels[id] : 0;
+        if (!nodesByLevel[lvl]) nodesByLevel[lvl] = [];
+        nodesByLevel[lvl].push(id);
+    }
+    let maxLvl = Math.max(...Object.keys(nodesByLevel).map(Number));
+
     nodeIds.forEach(id => {
         let n = nodeData[id];
         let isCrit = n.isCritical;
+        let url = createVerticalNodeSVG(id, n, isCrit, isDarkTheme);
+
+        let lvl = levels[id] || 0;
+        let list = nodesByLevel[lvl] || [id];
+        let idx = list.indexOf(id);
         
-        let bg = isDarkTheme ? (isCrit ? '#3f0f0f' : '#2d2d2d') : (isCrit ? '#ffe5e5' : '#f8f9fa');
-        let border = isCrit ? '#ff453a' : (isDarkTheme ? '#3b82f6' : '#3498db');
-        let txt = isDarkTheme ? '#e0e0e0' : '#333';
-        
-        if (id === 'INICIO' || id === 'FIN') {
-            nodes.add({
-                id: id,
-                label: id,
-                shape: 'ellipse',
-                color: { background: bg, border: border },
-                font: { color: txt }
-            });
-        } else {
-            // SVG Node representation for AON (ES, EF, ID, LS, LF)
-            let svg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" style="background-color:${bg}; border: 2px solid ${border}; border-radius: 8px;">
-                <rect width="120" height="20" fill="${isCrit ? (isDarkTheme ? '#7f1d1d' : '#ffcccc') : (isDarkTheme ? '#1e3a8a' : '#cce5ff')}" />
-                <text x="60" y="14" font-family="sans-serif" font-size="14" font-weight="bold" fill="${txt}" text-anchor="middle">${id} (d=${n.duration})</text>
-                
-                <text x="5" y="35" font-family="sans-serif" font-size="12" fill="${txt}">ES: ${n.ES}</text>
-                <text x="115" y="35" font-family="sans-serif" font-size="12" fill="${txt}" text-anchor="end">EF: ${n.EF}</text>
-                
-                <line x1="0" y1="40" x2="120" y2="40" stroke="${isDarkTheme ? '#555' : '#ccc'}" stroke-width="1"/>
-                
-                <text x="5" y="55" font-family="sans-serif" font-size="12" fill="${txt}">LS: ${n.LS}</text>
-                <text x="115" y="55" font-family="sans-serif" font-size="12" fill="${txt}" text-anchor="end">LF: ${n.LF}</text>
-            </svg>`;
-            
-            let url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-            
-            nodes.add({
-                id: id,
-                shape: 'image',
-                image: url,
-                size: 40
-            });
-        }
+        let initialX = (Number(lvl) - maxLvl / 2) * 220;
+        let initialY = (idx - (list.length - 1) / 2) * 160;
+
+        let posX = cachedNodePositions[id] ? cachedNodePositions[id].x : initialX;
+        let posY = cachedNodePositions[id] ? cachedNodePositions[id].y : initialY;
+
+        nodes.add({
+            id: id,
+            shape: 'image',
+            image: url,
+            size: 55,
+            x: posX,
+            y: posY
+        });
     });
 
     for (let u in adj) {
         for (let v of adj[u]) {
             let isCritEdge = nodeData[u].isCritical && nodeData[v].isCritical && (nodeData[u].EF === nodeData[v].ES || u === 'INICIO' || v === 'FIN');
+            
+            let dur = 0;
+            if (u !== 'INICIO' && nodeData[u]) {
+                dur = nodeData[u].duration !== undefined ? nodeData[u].duration : (nodeData[u].tn || 0);
+            }
+
             edges.add({
                 from: u,
                 to: v,
                 arrows: 'to',
+                smooth: false, // Arcos rectos
+                label: `${dur}`,
+                font: {
+                    color: isDarkTheme ? '#ffffff' : '#111827',
+                    size: 13,
+                    strokeWidth: 4,
+                    strokeColor: isDarkTheme ? '#141414' : '#fafafa',
+                    face: 'Inter, sans-serif',
+                    bold: true,
+                    align: 'top'
+                },
                 color: { color: isCritEdge ? '#ff453a' : (isDarkTheme ? '#9ca3af' : '#7f8c8d') },
-                width: isCritEdge ? 3 : 1
+                width: isCritEdge ? 3.5 : 1.5
             });
         }
     }
 
     let container = document.getElementById('graph-container');
     let options = {
-        layout: {
-            hierarchical: {
-                direction: 'LR',
-                sortMethod: 'directed',
-                levelSeparation: 180,
-                nodeSpacing: 100
-            }
-        },
         physics: { enabled: false },
-        interaction: { dragNodes: true, hover: true }
+        interaction: {
+            dragNodes: true,
+            dragView: true,
+            zoomView: true,
+            hover: true
+        },
+        edges: {
+            smooth: false // Arcos rectos
+        },
+        layout: {
+            hierarchical: false
+        }
     };
     
-    if(network) network.destroy();
+    if (network) network.destroy();
     network = new vis.Network(container, { nodes, edges }, options);
+
+    network.on('dragEnd', function(params) {
+        if (params.nodes && params.nodes.length > 0) {
+            let pos = network.getPositions(params.nodes);
+            for (let id in pos) {
+                cachedNodePositions[id] = pos[id];
+            }
+        }
+    });
+}
+
+async function captureAllCPMSnapshots() {
+    if (!solverResult || !solverResult.steps || solverResult.steps.length === 0) return;
+    let savedIndex = currentStepIndex;
+
+    for (let i = 0; i < solverResult.steps.length; i++) {
+        drawGraph(solverResult.graphs[i], solverResult.adj);
+        await new Promise(resolve => {
+            let handled = false;
+            const done = () => {
+                if (!handled) {
+                    handled = true;
+                    resolve();
+                }
+            };
+            if (network) network.once('afterDrawing', done);
+            setTimeout(done, 120);
+        });
+
+        if (network) {
+            network.fit({ animation: false });
+            network.redraw();
+        }
+
+        let canvas = document.querySelector('#graph-container canvas');
+        if (canvas) {
+            let offCanvas = document.createElement('canvas');
+            offCanvas.width = canvas.width;
+            offCanvas.height = canvas.height;
+            let ctx = offCanvas.getContext('2d');
+            ctx.fillStyle = isDarkTheme ? '#141414' : '#ffffff';
+            ctx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+            ctx.drawImage(canvas, 0, 0);
+            solverResult.steps[i].graphSnapshot = offCanvas.toDataURL('image/png');
+        }
+    }
+
+    currentStepIndex = savedIndex;
+    drawGraph(solverResult.graphs[currentStepIndex], solverResult.adj);
+}
+
+async function renderFullLog() {
+    document.getElementById('step-description').innerHTML = "<div style='text-align:center;padding:30px;color:var(--accent);font-weight:500'>⏳ Generando solución completa con vistas de la red AON...</div>";
+    document.getElementById('step-info').innerText = 'Solución Completa';
+    
+    await captureAllCPMSnapshots();
+
+    let h = "";
+    solverResult.steps.forEach((s, i) => {
+        let sh = s.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+        if (s.tableHTML) sh += "<br>" + s.tableHTML;
+        h += `
+        <div class="full-log-card" style="margin-bottom:20px;padding:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px">
+                <h4 style="margin:0;color:var(--accent);font-size:1.05rem;font-weight:600">📌 Paso ${i+1} de ${solverResult.steps.length}</h4>
+            </div>
+            <div style="line-height:1.6;margin-bottom:14px;color:var(--text)">
+                ${sh}
+            </div>
+            ${s.graphSnapshot ? `
+            <div style="text-align:center;margin-top:12px;background:var(--bg);padding:10px;border-radius:10px;border:1px solid var(--border)">
+                <div style="font-size:0.78rem;color:var(--text-2);margin-bottom:8px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px">
+                    <span>🖼️ Red de Actividades (AON) — Paso ${i+1}</span>
+                </div>
+                <img src="${s.graphSnapshot}" alt="Red CPM en Paso ${i+1}" style="max-width:100%;height:auto;max-height:380px;border-radius:8px;object-fit:contain;box-shadow:0 4px 14px rgba(0,0,0,0.3);cursor:zoom-in" onclick="window.open(this.src,'_blank')" title="Clic para abrir en tamaño completo" />
+            </div>` : ''}
+        </div>`;
+    });
+    document.getElementById('step-description').innerHTML = h;
 }
 
 function backToEdit() {
-    document.getElementById('solver-panel').style.display='none';
-    document.getElementById('data-entry-panel').style.display='block';
+    document.getElementById('solver-panel').style.display = 'none';
+    document.getElementById('data-entry-panel').style.display = 'block';
     document.getElementById('main-flex').classList.remove('full-log-mode');
-    isFullLogMode=false;
-    document.getElementById('btn-full-log').innerHTML='Ver Todo 📄';
+    isFullLogMode = false;
+    document.getElementById('btn-full-log').innerHTML = 'Ver Todo 📄';
 }
 
-function setupFullLog(){
-    let btn=document.getElementById('btn-full-log');
-    btn.addEventListener('click',()=>{
-        isFullLogMode=!isFullLogMode;
-        if(isFullLogMode){
+function setupFullLog() {
+    let btn = document.getElementById('btn-full-log');
+    btn.addEventListener('click', async () => {
+        isFullLogMode = !isFullLogMode;
+        if (isFullLogMode) {
             document.getElementById('main-flex').classList.add('full-log-mode');
-            btn.innerHTML='Volver al Paso a Paso 🔄';
-            let h="";
-            solverResult.steps.forEach((s,i)=>{
-                h+=`<h4 style="margin-top:15px;margin-bottom:10px;color:var(--accent)">Paso ${i+1}</h4>`;
-                h+=s.description.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-                if(s.tableHTML) h+="<br>"+s.tableHTML;
-                h+="<hr style='margin-top:15px;border:0;border-top:1px solid var(--border)'>";
-            });
-            document.getElementById('step-description').innerHTML=h;
-            document.getElementById('btn-prev-step').style.display='none';
-            document.getElementById('btn-next-step').style.display='none';
-            document.getElementById('step-info').innerText='Solución Completa';
+            btn.innerHTML = 'Volver al Paso a Paso 🔄';
+            document.getElementById('btn-prev-step').style.display = 'none';
+            document.getElementById('btn-next-step').style.display = 'none';
+            await renderFullLog();
             currentStepIndex = solverResult.steps.length - 1;
             drawGraph(solverResult.graphs[currentStepIndex], solverResult.adj);
         } else {
             document.getElementById('main-flex').classList.remove('full-log-mode');
-            btn.innerHTML='Ver Todo 📄';
-            document.getElementById('btn-prev-step').style.display='inline-block';
-            document.getElementById('btn-next-step').style.display='inline-block';
-            currentStepIndex=0;
+            btn.innerHTML = 'Ver Todo 📄';
+            document.getElementById('btn-prev-step').style.display = 'inline-block';
+            document.getElementById('btn-next-step').style.display = 'inline-block';
+            currentStepIndex = 0;
             renderStep();
         }
     });
 }
 
-function toggleTheme(){
-    isDarkTheme=!isDarkTheme;let btn=document.getElementById('btn-theme');
-    if(isDarkTheme){document.documentElement.removeAttribute('data-theme');btn.innerHTML='☀︎ Modo Claro';}else{document.documentElement.setAttribute('data-theme','light');btn.innerHTML='🌙 Modo Oscuro';}
+function toggleTheme() {
+    isDarkTheme = !isDarkTheme;
+    let btn = document.getElementById('btn-theme');
+    if (isDarkTheme) {
+        document.documentElement.removeAttribute('data-theme');
+        btn.innerHTML = '☀︎ Modo Claro';
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        btn.innerHTML = '🌙 Modo Oscuro';
+    }
     if (solverResult && solverResult.graphs) {
         drawGraph(solverResult.graphs[currentStepIndex], solverResult.adj);
+        if (isFullLogMode) renderFullLog();
     }
 }
 </script>
