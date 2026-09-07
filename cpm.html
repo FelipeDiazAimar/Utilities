@@ -99,6 +99,12 @@
         #step-description table{margin:.75rem 0}
         #step-description th,#step-description td{padding:.5rem .65rem}
         #step-description strong{color:var(--accent)}
+        .calc-table{font-size:.72rem}
+        .calc-table th{font-size:.66rem;white-space:normal;line-height:1.3}
+        .calc-table td.calc-cell{text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
+        .calc-table td.calc-cell strong{color:var(--green)}
+        .calc-table sub{font-size:.82em}
+        .calc-note{color:var(--text-2);font-style:italic}
 
         .conclusion-box{margin-top:20px;padding:18px 22px;background:var(--highlight-bg);border:2px solid var(--accent);border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,0.12)}
 
@@ -123,7 +129,7 @@
         </div>
         <div class="controls">
             <button id="btn-example">Ejemplo Simple</button>
-            <button id="btn-example-cost">Ejemplo Tiempo-Costo</button>
+            <button id="btn-example-cost">Ejercicio 13</button>
             <button id="btn-save" class="purple">💾 Guardar</button>
             <button id="btn-load" class="purple">📂 Cargar</button>
             <input type="file" id="file-load" accept=".json" style="display:none">
@@ -301,52 +307,110 @@ class CPMSolver {
                 n.crashedSoFar = 0;
             }
 
-            while (true) {
+            // ── Enumera todas las rutas críticas (INICIO→FIN) como arrays de ids de actividad ──
+            const enumCriticalPaths = (cn) => {
+                let paths = [];
+                const dfs = (node, acc) => {
+                    if (node === 'FIN') { paths.push(acc.slice()); return; }
+                    let outs = (adj[node] || []).filter(v =>
+                        cn[node].isCritical && cn[v].isCritical && cn[v].ES === cn[node].EF);
+                    for (let v of outs) dfs(v, v === 'FIN' ? acc : acc.concat(v));
+                };
+                dfs('INICIO', []);
+                return paths;
+            };
+
+            // ── Corte de mínimo costo: conjunto de actividades comprimibles de menor
+            //    costo marginal total que acorta TODAS las rutas críticas a la vez.
+            //    (Método clásico de compensación tiempo-costo, Fulkerson/Kelley.)
+            const minCostCut = (paths) => {
+                const crashable = id => nodes[id].crashedSoFar < nodes[id].maxReduction;
+                if (paths.length === 0) return null;
+                // Si alguna ruta crítica ya no tiene actividades comprimibles → duración mínima
+                if (!paths.every(p => p.some(crashable))) return null;
+
+                let cand = [...new Set(paths.flat())].filter(crashable);
+                let best = null;
+
+                if (cand.length <= 20) {
+                    for (let mask = 1; mask < (1 << cand.length); mask++) {
+                        let subset = [], cost = 0;
+                        for (let i = 0; i < cand.length; i++) {
+                            if (mask & (1 << i)) { subset.push(cand[i]); cost += nodes[cand[i]].crashCostPerUnit; }
+                        }
+                        if (!paths.every(p => p.some(id => subset.includes(id)))) continue;
+                        if (!best || cost < best.cost - 1e-9 ||
+                            (Math.abs(cost - best.cost) < 1e-9 && subset.length < best.subset.length)) {
+                            best = { subset, cost };
+                        }
+                    }
+                } else {
+                    // Respaldo voraz para proyectos muy grandes (evita 2^n)
+                    let subset = [], cost = 0;
+                    for (let p of paths) {
+                        if (p.some(id => subset.includes(id))) continue;
+                        let pick = p.filter(crashable)
+                            .sort((a, b) => nodes[a].crashCostPerUnit - nodes[b].crashCostPerUnit)[0];
+                        subset.push(pick); cost += nodes[pick].crashCostPerUnit;
+                    }
+                    best = { subset, cost };
+                }
+                return best;
+            };
+
+            // Agrupa unidades consecutivas que comprimen el mismo conjunto en un solo paso
+            let seg = null;
+            const flushSegment = () => {
+                if (!seg) return;
                 iter++;
-                let candidates = cpmState.criticalPath.map(id => nodes[id])
-                    .filter(n => n.crashedSoFar < n.maxReduction);
-                
-                if (candidates.length === 0) {
-                    this._recordStep(iter, "**Fin de la compresión:** Se alcanzó la reducción máxima posible en todas las actividades de la ruta crítica.", cpmState, totalCost, true, initialDuration, initialCost);
+                let st = calcCPM(nodes);
+                for (let id of allNodes) {
+                    let nd = st.nodes[id];
+                    this.nodeHistories[id].push({ early: nd.EF, late: nd.LF, isCrit: nd.isCritical, dur: nd.duration });
+                }
+                let detail = seg.ids.map(id =>
+                    `**${id}** (${seg.from[id]}→${nodes[id].duration}: ${seg.units} sem × $${nodes[id].crashCostPerUnit.toFixed(0)}/sem)`
+                ).join(' + ');
+                let critPaths = enumCriticalPaths(st.nodes).map(p => p.join('-'));
+                let desc = `**Iteración de Compresión ${iter - 1}**\n`;
+                desc += (seg.ids.length > 1
+                    ? `Se comprimen en paralelo las actividades críticas ${detail}.\n`
+                    : `Se comprime la actividad crítica ${detail}.\n`);
+                desc += `• Semanas de proyecto reducidas en este paso: **${seg.units}**.\n`;
+                desc += `• Costo marginal del corte (K): **$${seg.perUnit.toFixed(2)}/semana**.\n`;
+                desc += `• Costo adicional de compresión: **$${seg.cost.toFixed(2)}**.\n`;
+                desc += `• Nueva duración del proyecto: **${st.duration}** unidades de tiempo.\n`;
+                desc += `• Nuevo costo total del proyecto: **$${totalCost.toFixed(2)}**.\n`;
+                desc += `• Ruta(s) crítica(s): ${critPaths.join('  |  ')}`;
+                this._recordStep(iter, desc, st, totalCost, false, initialDuration, initialCost);
+                cpmState = st;
+                seg = null;
+            };
+
+            while (true) {
+                let paths = enumCriticalPaths(cpmState.nodes);
+                let cut = minCostCut(paths);
+
+                if (!cut) {
+                    flushSegment();
+                    iter++;
+                    this._recordStep(iter, "**Fin de la compresión:** se alcanzó la duración mínima del proyecto. Toda ruta crítica tiene al menos una actividad ya comprimida a su tiempo mínimo, por lo que no es posible acortarla más.", cpmState, totalCost, true, initialDuration, initialCost);
                     break;
                 }
 
-                candidates.sort((a, b) => a.crashCostPerUnit - b.crashCostPerUnit);
-                let target = candidates[0];
-
-                let maxDelta = target.maxReduction - target.crashedSoFar;
-                let prevDuration = target.duration;
-
-                target.duration -= maxDelta;
-                target.crashedSoFar += maxDelta;
-                let addedCost = maxDelta * target.crashCostPerUnit;
-                totalCost += addedCost;
-
-                let newState = calcCPM(nodes);
-
-                // Record history for this iteration
-                for (let id of allNodes) {
-                    let nd = newState.nodes[id];
-                    this.nodeHistories[id].push({
-                        early: nd.EF,
-                        late: nd.LF,
-                        isCrit: nd.isCritical,
-                        dur: nd.duration
-                    });
+                let key = [...cut.subset].sort().join(',');
+                if (!seg || seg.key !== key) {
+                    flushSegment();
+                    seg = { key, ids: [...cut.subset].sort(), units: 0, cost: 0, perUnit: cut.cost, from: {} };
+                    for (let id of seg.ids) seg.from[id] = nodes[id].duration;
                 }
 
-                let desc = `**Iteración de Compresión ${iter-1}**\n`;
-                desc += `Se redujo la actividad crítica **${target.id}** en su capacidad máxima posible: **${maxDelta}** unidades (de ${prevDuration} a ${target.duration}).\n`;
-                desc += `• Reducción máxima total ($M_${target.id} = \\tau_${target.id} - \\tau'_${target.id}$): ${target.maxReduction} unidades.\n`;
-                desc += `• Costo marginal unitario ($K_${target.id}$): $${target.crashCostPerUnit.toFixed(2)} / unidad.\n`;
-                desc += `• Costo adicional de compresión: **$${addedCost.toFixed(2)}**.\n`;
-                desc += `• Nueva duración del proyecto: **${newState.duration}** unidades de tiempo.\n`;
-                desc += `• Nuevo costo total del proyecto: **$${totalCost.toFixed(2)}**.\n`;
-                desc += `• Nueva Ruta Crítica: ${newState.criticalPath.join(' → ')}`;
+                for (let id of cut.subset) { nodes[id].duration -= 1; nodes[id].crashedSoFar += 1; }
+                totalCost += cut.cost;
+                seg.units += 1;
+                seg.cost += cut.cost;
 
-                let isFinal = false; // Next iteration will evaluate if more candidates exist
-                this._recordStep(iter, desc, newState, totalCost, isFinal, initialDuration, initialCost);
-                cpmState = newState;
+                cpmState = calcCPM(nodes);
             }
         }
 
@@ -542,12 +606,16 @@ function loadExampleSimple() {
 
 function loadExampleCost() {
     cachedNodePositions = {};
+    // Guía de TP N°3 — Ejercicio 13: construcción de una nave industrial (Construcciones Atle).
+    // Tiempos en semanas; costos en cientos de dólares.
     activities = [
-        { id: 'A', desc: 'Actividad A', pred: [], tn: 7, ta: 4, cn: 500, ca: 800 },
-        { id: 'B', desc: 'Actividad B', pred: [], tn: 3, ta: 2, cn: 200, ca: 350 },
-        { id: 'C', desc: 'Actividad C', pred: [], tn: 6, ta: 4, cn: 500, ca: 900 },
-        { id: 'D', desc: 'Actividad D', pred: ['A'], tn: 3, ta: 1, cn: 200, ca: 500 },
-        { id: 'E', desc: 'Actividad E', pred: ['B', 'C'], tn: 2, ta: 1, cn: 300, ca: 550 }
+        { id: 'A', desc: 'Actividad A', pred: [], tn: 14, ta: 6, cn: 1400, ca: 2200 },
+        { id: 'B', desc: 'Actividad B', pred: [], tn: 12, ta: 8, cn: 1000, ca: 1800 },
+        { id: 'C', desc: 'Actividad C', pred: ['A'], tn: 18, ta: 14, cn: 1600, ca: 2000 },
+        { id: 'D', desc: 'Actividad D', pred: ['A'], tn: 6, ta: 4, cn: 800, ca: 1200 },
+        { id: 'E', desc: 'Actividad E', pred: ['B'], tn: 4, ta: 2, cn: 400, ca: 800 },
+        { id: 'F', desc: 'Actividad F', pred: ['D', 'E'], tn: 8, ta: 6, cn: 400, ca: 600 },
+        { id: 'G', desc: 'Actividad G', pred: ['C', 'F'], tn: 12, ta: 8, cn: 800, ca: 1200 }
     ];
     document.getElementById('solve-mode').value = 'crash';
     renderTable();
@@ -584,8 +652,9 @@ function renderStep() {
     
     let h = s.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
     if (s.tableHTML) h += "<br>" + s.tableHTML;
+    h += buildCalcTableHTML(solverResult.graphs[currentStepIndex], solverResult.adj, solverResult.revAdj);
     document.getElementById('step-description').innerHTML = h;
-    
+
     drawGraph(solverResult.graphs[currentStepIndex], solverResult.adj);
 }
 
@@ -597,16 +666,21 @@ function createVerticalNodeSVG(id, n, isCrit, isDarkTheme) {
     let headerTxt = isCrit ? (isDarkTheme ? '#fca5a5' : '#991b1b') : (isDarkTheme ? '#bfdbfe' : '#1e3a8a');
     let divColor = isDarkTheme ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.14)';
 
+    let subTxt = isDarkTheme ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)';
+    let subBg = isDarkTheme ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)';
+
     let history = n.history && n.history.length > 0 ? n.history : [{ early: n.EF || 0, late: n.LF || 0, isCrit: isCrit }];
     let numRows = Math.max(1, history.length);
     let rowH = 26;
     let headerH = 32;
+    let subHeaderH = 14;          // banda con los rótulos EF | LF
+    let bodyTop = headerH + subHeaderH;
     let cardW = 88;
-    let cardH = headerH + numRows * rowH + 4;
+    let cardH = bodyTop + numRows * rowH + 4;
 
     let rowsSvg = '';
     history.forEach((hRow, idx) => {
-        let y = headerH + idx * rowH;
+        let y = bodyTop + idx * rowH;
         let isLast = idx === history.length - 1;
         let rowFill = isLast && isCrit ? (isDarkTheme ? 'rgba(255,69,58,0.15)' : 'rgba(255,69,58,0.1)') : 'transparent';
         let rowTxtColor = isLast && isCrit ? (isDarkTheme ? '#ff8585' : '#dc2626') : txt;
@@ -637,14 +711,129 @@ function createVerticalNodeSVG(id, n, isCrit, isDarkTheme) {
         <path d="M 1 7 Q 1 1 7 1 L ${cardW - 7} 1 Q ${cardW - 1} 1 ${cardW - 1} 7 L ${cardW - 1} ${headerH} L 1 ${headerH} Z" fill="${headerBg}"/>
         <text x="${cardW / 2}" y="${headerH - 10}" font-family="'Inter', -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="700" fill="${headerTxt}" text-anchor="middle">${id}</text>
         <line x1="1" y1="${headerH}" x2="${cardW - 1}" y2="${headerH}" stroke="${border}" stroke-width="1.5"/>
-        
+
+        <!-- Sub-header: rótulos de columna -->
+        <rect x="1" y="${headerH}" width="${cardW - 2}" height="${subHeaderH}" fill="${subBg}"/>
+        <text x="${cardW / 4}" y="${headerH + subHeaderH - 4}" font-family="'Inter', sans-serif" font-size="9" font-weight="700" letter-spacing="0.5" fill="${subTxt}" text-anchor="middle">EF</text>
+        <text x="${(3 * cardW) / 4}" y="${headerH + subHeaderH - 4}" font-family="'Inter', sans-serif" font-size="9" font-weight="700" letter-spacing="0.5" fill="${subTxt}" text-anchor="middle">LF</text>
+        <line x1="1" y1="${bodyTop}" x2="${cardW - 1}" y2="${bodyTop}" stroke="${divColor}" stroke-width="1"/>
+
         <!-- Vertical Center Divider -->
         <line x1="${cardW / 2}" y1="${headerH}" x2="${cardW / 2}" y2="${cardH - 2}" stroke="${border}" stroke-width="1.5"/>
-        
+
         <!-- Iteration Rows -->
         ${rowsSvg}
     </svg>`;
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+// Superpone el carácter combinante U+0336 sobre cada símbolo para "tachar" el texto
+// (vis-network no admite <s>/<del> en las etiquetas de aristas).
+function strikeThrough(s) {
+    return String(s).split('').map(ch => ch + '̶').join('');
+}
+
+// Etiqueta de arista: la flecha que LLEGA a una actividad lleva su duración
+// (tiempo normal al inicio). En cada iteración de compresión el valor nuevo se
+// apila arriba y el anterior queda tachado debajo.
+function buildEdgeLabel(node) {
+    if (!node || node.id === 'INICIO' || node.id === 'FIN') return '0';
+    let cur = node.duration !== undefined ? node.duration : (node.tn || 0);
+    let hist = (node.history && node.history.length) ? node.history.map(h => h.dur) : null;
+    if (!hist) return `${cur}`;
+
+    // Secuencia de valores distintos (colapsa iteraciones sin cambios)
+    let distinct = [];
+    for (let d of hist) {
+        if (distinct.length === 0 || distinct[distinct.length - 1] !== d) distinct.push(d);
+    }
+    if (distinct.length <= 1) return `${distinct.length ? distinct[0] : cur}`;
+
+    // Más reciente arriba (sin tachar); los anteriores debajo, tachados
+    let rows = [];
+    for (let i = distinct.length - 1; i >= 0; i--) {
+        rows.push(i === distinct.length - 1 ? `${distinct[i]}` : strikeThrough(distinct[i]));
+    }
+    return rows.join('\n');
+}
+
+// Tabla explicativa: cómo se obtiene cada campo (ES, EF, LF, LS, Holgura) de cada
+// actividad, con los números del paso actual sustituidos en la fórmula. Genérica:
+// sirve para cualquier proyecto, no solo el ejemplo cargado.
+function buildCalcTableHTML(graphState, adj, revAdj) {
+    let nodes = graphState.nodes;
+    if (!nodes) return '';
+    let projDur = nodes['FIN'] ? nodes['FIN'].EF : 0;
+
+    let rows = '';
+    for (let id in nodes) {
+        if (id === 'INICIO' || id === 'FIN') continue;
+        let n = nodes[id];
+        let dur = n.duration;
+
+        // ── ES = máx(EF de las precedentes) ──
+        let preds = (revAdj[id] || []).filter(p => p !== 'INICIO' && nodes[p]);
+        let esCell;
+        if (preds.length === 0) {
+            esCell = `<strong>0</strong> <span class="calc-note">(sin precedentes)</span>`;
+        } else {
+            let terms = preds.map(p => `EF<sub>${p}</sub>=${nodes[p].EF}`);
+            let vals = preds.map(p => nodes[p].EF);
+            esCell = `máx(${terms.join(', ')}) = máx(${vals.join(', ')}) = <strong>${n.ES}</strong>`;
+        }
+
+        // ── EF = ES + Duración ──
+        let efCell = `${n.ES} + ${dur} = <strong>${n.EF}</strong>`;
+
+        // ── LF = mín(LS de las siguientes) ──
+        let succs = (adj[id] || []).filter(sx => sx !== 'FIN' && nodes[sx]);
+        let lfCell;
+        if (succs.length === 0) {
+            lfCell = `<strong>${projDur}</strong> <span class="calc-note">(fin del proyecto)</span>`;
+        } else {
+            let terms = succs.map(sx => `LS<sub>${sx}</sub>=${nodes[sx].LS}`);
+            let vals = succs.map(sx => nodes[sx].LS);
+            lfCell = `mín(${terms.join(', ')}) = mín(${vals.join(', ')}) = <strong>${n.LF}</strong>`;
+        }
+
+        // ── LS = LF − Duración   //   Holgura = LS − ES ──
+        let lsCell = `${n.LF} − ${dur} = <strong>${n.LS}</strong>`;
+        let slackCell = `${n.LS} − ${n.ES} = <strong>${n.slack}</strong>`;
+
+        rows += `<tr style="${n.isCritical ? 'background:rgba(255,69,58,0.08)' : ''}">
+            <td><strong>${id}</strong></td>
+            <td>${dur}</td>
+            <td class="calc-cell">${esCell}</td>
+            <td class="calc-cell">${efCell}</td>
+            <td class="calc-cell">${lfCell}</td>
+            <td class="calc-cell">${lsCell}</td>
+            <td class="calc-cell">${slackCell}</td>
+        </tr>`;
+    }
+
+    return `
+    <div style="margin-top:18px">
+        <strong style="font-size:.9rem">🧮 Cómo se calcula cada campo del nodo</strong>
+        <div style="font-size:.75rem;color:var(--text-2);margin:4px 0 8px">
+            Recorrido hacia adelante → <strong>ES</strong>, <strong>EF</strong>. &nbsp;·&nbsp;
+            Recorrido hacia atrás → <strong>LF</strong>, <strong>LS</strong>. &nbsp;·&nbsp;
+            En cada nodo del grafo: izquierda = <strong>EF</strong>, derecha = <strong>LF</strong>.
+            Actividad crítica ⇔ Holgura = 0.
+        </div>
+        <div class="table-container">
+            <table class="calc-table">
+                <thead><tr>
+                    <th>Act.</th><th>Dur.</th>
+                    <th>ES = máx(EF de precedentes)</th>
+                    <th>EF = ES + Dur.</th>
+                    <th>LF = mín(LS de siguientes)</th>
+                    <th>LS = LF − Dur.</th>
+                    <th>Holgura = LS − ES</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    </div>`;
 }
 
 function drawGraph(graphState, adj) {
@@ -673,6 +862,7 @@ function drawGraph(graphState, adj) {
 
     let nodesByLevel = {};
     for (let id of nodeIds) {
+        if (id === 'FIN') continue; // FIN no se dibuja: no cuenta para el layout
         let lvl = levels[id] !== undefined ? levels[id] : 0;
         if (!nodesByLevel[lvl]) nodesByLevel[lvl] = [];
         nodesByLevel[lvl].push(id);
@@ -680,6 +870,7 @@ function drawGraph(graphState, adj) {
     let maxLvl = Math.max(...Object.keys(nodesByLevel).map(Number));
 
     nodeIds.forEach(id => {
+        if (id === 'FIN') return; // El nodo FIN no se dibuja
         let n = nodeData[id];
         let isCrit = n.isCritical;
         let url = createVerticalNodeSVG(id, n, isCrit, isDarkTheme);
@@ -706,19 +897,17 @@ function drawGraph(graphState, adj) {
 
     for (let u in adj) {
         for (let v of adj[u]) {
+            if (v === 'FIN') continue; // No se dibujan las aristas hacia el nodo FIN
             let isCritEdge = nodeData[u].isCritical && nodeData[v].isCritical && (nodeData[u].EF === nodeData[v].ES || u === 'INICIO' || v === 'FIN');
             
-            let dur = 0;
-            if (u !== 'INICIO' && nodeData[u]) {
-                dur = nodeData[u].duration !== undefined ? nodeData[u].duration : (nodeData[u].tn || 0);
-            }
+            let edgeLabel = buildEdgeLabel(nodeData[v]);
 
             edges.add({
                 from: u,
                 to: v,
                 arrows: 'to',
                 smooth: false, // Arcos rectos
-                label: `${dur}`,
+                label: edgeLabel,
                 font: {
                     color: isDarkTheme ? '#ffffff' : '#111827',
                     size: 13,
@@ -726,7 +915,8 @@ function drawGraph(graphState, adj) {
                     strokeColor: isDarkTheme ? '#141414' : '#fafafa',
                     face: 'Inter, sans-serif',
                     bold: true,
-                    align: 'top'
+                    align: 'top',
+                    multi: false
                 },
                 color: { color: isCritEdge ? '#ff453a' : (isDarkTheme ? '#9ca3af' : '#7f8c8d') },
                 width: isCritEdge ? 3.5 : 1.5
@@ -814,6 +1004,7 @@ async function renderFullLog() {
     solverResult.steps.forEach((s, i) => {
         let sh = s.description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         if (s.tableHTML) sh += "<br>" + s.tableHTML;
+        sh += buildCalcTableHTML(solverResult.graphs[i], solverResult.adj, solverResult.revAdj);
         h += `
         <div class="full-log-card" style="margin-bottom:20px;padding:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px">
